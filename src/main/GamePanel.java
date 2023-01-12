@@ -26,7 +26,7 @@ public class GamePanel extends JPanel implements Runnable{
 	int playerX = 200;
 	int playerY = 200;
 	int playerSpeed = 5;
-	
+	Player player = new Player(this);
 	
 	public GamePanel(MainFrame frame) {
 		this.frame = frame;
@@ -72,15 +72,13 @@ public class GamePanel extends JPanel implements Runnable{
 	}
 	
 	public void update() {
-		playerX += playerSpeed;
+		player.update();
 	}
 	
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		Graphics2D g2 = (Graphics2D) g;
-		System.out.println("yes");
-		g2.setColor(Color.white);
-		g2.drawRect(playerX, playerY, 50, 50);
+		
 		g2.dispose();
 	}
 

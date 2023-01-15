@@ -36,9 +36,10 @@ public class MainFrame extends JFrame{
 		//make panels
 		menuPanel = new MenuPanel(this);
 		gamePanel = new GamePanel(this);
-        mainPanel.add(gamePanel, "game");
 
+        mainPanel.add(gamePanel, "game");
         mainPanel.add(menuPanel, "menu");
+
       
 		add(mainPanel);
 		pack();
@@ -47,9 +48,9 @@ public class MainFrame extends JFrame{
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
-	    gamePanel.startGameThread();
-
+	    gamePanel.startGame();
 	}
+	
 	
 	//switch to game panel
 	public void gameOn() {

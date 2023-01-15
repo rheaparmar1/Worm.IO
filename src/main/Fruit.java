@@ -1,12 +1,12 @@
 package main;
 import java.awt.*;
 
-public class Food{
+public class Fruit{
 
 	Point p;
 	static final int u = GamePanel.UNIT_SIZE;
 	
-	public Food(Point p){
+	public Fruit(Point p){
 		this.p = p;
 	}
 

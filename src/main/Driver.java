@@ -1,6 +1,6 @@
 package main;
 import javax.swing.JFrame;
-
+//Karen
 public class Driver {
 	static int width = 1400;
 	static int height = 700;

@@ -157,11 +157,11 @@ public class GamePanel extends JPanel implements Runnable {
 
 	private void drawTile(Graphics g) {
 
-		g.setColor(new Color(125, 125, 125));
-		g.fillRect(0, 0, mapBottomRight.x, topLeft.y);
-		g.fillRect(0, bottomRight.y, mapBottomRight.x, mapBottomRight.y);
-		g.fillRect(0, 0, topLeft.x, mapBottomRight.y);
-		g.fillRect(bottomRight.x, 0, mapBottomRight.x, mapBottomRight.y);
+//		g.setColor(new Color(125, 125, 125));
+//		g.fillRect(0, 0, mapBottomRight.x, topLeft.y);
+//		g.fillRect(0, bottomRight.y, mapBottomRight.x, mapBottomRight.y);
+//		g.fillRect(0, 0, topLeft.x, mapBottomRight.y);
+//		g.fillRect(bottomRight.x, 0, mapBottomRight.x, mapBottomRight.y);
 
 		int color = 87;
 		int tileSize = 80;

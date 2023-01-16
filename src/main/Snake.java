@@ -52,7 +52,7 @@ public class Snake {
 	}
 
 	private Point calcNewPoint(Point head, Point mouse) {
-		System.out.println(head.x + "," + head.y + "->" + mouse.x + "," + mouse.y);
+	//	System.out.println(head.x + "," + head.y + "->" + mouse.x + "," + mouse.y);
 		double degree = 0;
 		if (head.x < mouse.x && head.y < mouse.y) {
 			degree = 360 - Math.toDegrees(Math.atan((double) (mouse.y - head.y) / (mouse.x - head.x)));
@@ -63,8 +63,8 @@ public class Snake {
 		} else if (head.y < mouse.y && head.x > mouse.x) {
 			degree = 180 + Math.toDegrees(Math.atan((double) (mouse.y - head.y) / (head.x - mouse.x)));
 		}
-		Point p = new Point((int) (head.x + Math.cos(Math.toRadians(degree)) * u),
-				(int) (head.y - Math.sin(Math.toRadians(degree)) * u));
+		Point p = new Point((int) (head.x + Math.cos(Math.toRadians(degree)) * 10),
+				(int) (head.y - Math.sin(Math.toRadians(degree)) * 10));
 		return p;
 	}
 }

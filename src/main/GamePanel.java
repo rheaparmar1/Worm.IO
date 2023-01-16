@@ -32,8 +32,8 @@ public class GamePanel extends JPanel implements Runnable {
 	static final int FPS = 60;
 
 	final Snake player;
-	final ArrayList<Snake> snakes = new ArrayList<Snake>();
-	final ArrayList<Food> fruits = new ArrayList<Food>();
+	final Map<Integer, Snake> snakes = new HashMap<Integer, Snake>();
+	final HashSet<Food> foods = new HashSet<Food>();
 
 	public BufferedImage fullMap;
 	public BufferedImage originalMap;
@@ -41,12 +41,13 @@ public class GamePanel extends JPanel implements Runnable {
 	Graphics graphics;
 
 	Thread gameThread;
+    final Object modelLock = new Object();
 
 	public GamePanel(MainFrame maniFrame) {
 		this.maniFrame = maniFrame;
 		this.originalMap = loadMap();
 
-		player = new Snake(new Point(VIEW_WIDTH, VIEW_HEIGHT));
+		player = new Snake(new Point(randomPoint()));
 		setPreferredSize(new Dimension(VIEW_WIDTH, VIEW_HEIGHT));
 		this.setBackground(Color.black);
 		this.setFocusable(true);
@@ -86,7 +87,7 @@ public class GamePanel extends JPanel implements Runnable {
 		double nextDrawTime = System.nanoTime() + drawInterval;
 		while (true) {
 
-			move();
+			update();
 			checkCollision();
 			repaint();
 
@@ -115,30 +116,63 @@ public class GamePanel extends JPanel implements Runnable {
 	
 	public static Point randomPoint() {
 		Point p = new Point(0,0);
-		p.x=(int)(Math.random()*(1400*7+1)+700); 
-		p.y=(int)(Math.random()*(700*7+1)+350); 
+		p.x=(int)(Math.random()*(MAP_WIDTH-VIEW_WIDTH-UNIT_SIZE)+BORDER_WIDTH); 
+		p.y=(int)(Math.random()*(MAP_HEIGHT-VIEW_HEIGHT-UNIT_SIZE)+BORDER_HEIGHT); 
 		return p;
 	}
 
-	private void move() {
+	private void update() {
+		synchronized(modelLock) {
+			if(foods.size() < 2000){
+				Food newFood = new Food(randomPoint());
+				while(!foods.add(newFood));
+			}
+		}
+		
+		
 		Point m = MouseInfo.getPointerInfo().getLocation();
 		Point f = maniFrame.getLocation();
 		Point v = getViewPoint();
 		Point p = new Point(m.x - f.x + v.x, m.y - f.y + v.y - 24);
 		player.move(p);
 	}
+	
+
 
 	private void draw(Graphics g) {
-		player.draw(g);
+		synchronized(modelLock) {
+			player.draw(g);
+			for(Food f: foods){
+				f.draw(g);
+			}
+		}
+		
+		
 	}
 
 	private void checkCollision() {
 		Point h = player.getHead();
 		if (h.x < topLeft.x || h.x + UNIT_SIZE > bottomRight.x
 			|| h.y < topLeft.y || h.y + UNIT_SIZE > bottomRight.y) {
-		//	System.out.println("border");
-      }
+
+		}
+		synchronized(modelLock) {
+			Iterator it = foods.iterator();
+			while (it.hasNext()) {
+			    Food f = (Food) it.next();
+			    if(f.checkCollide(h)) {
+					player.Grew();
+					System.out.println(player.bodyParts);
+					System.out.println(foods.size());
+				    it.remove();
+				}
+			}
+			
+		}
+		
 	}
+	
+	
 
 	private Point getViewPoint() {
 		Point h = player.getHead();
@@ -157,12 +191,15 @@ public class GamePanel extends JPanel implements Runnable {
 
 	private void drawTile(Graphics g) {
 
-//		g.setColor(new Color(125, 125, 125));
-//		g.fillRect(0, 0, mapBottomRight.x, topLeft.y);
-//		g.fillRect(0, bottomRight.y, mapBottomRight.x, mapBottomRight.y);
-//		g.fillRect(0, 0, topLeft.x, mapBottomRight.y);
-//		g.fillRect(bottomRight.x, 0, mapBottomRight.x, mapBottomRight.y);
+		g.setColor(new Color(125, 125, 125));
+		g.fillRect(0, 0, mapBottomRight.x, topLeft.y);
+		g.fillRect(0, bottomRight.y, mapBottomRight.x, mapBottomRight.y);
+		g.fillRect(0, 0, topLeft.x, mapBottomRight.y);
+		g.fillRect(bottomRight.x, 0, mapBottomRight.x, mapBottomRight.y);
 
+
+		
+		
 		int color = 87;
 		int tileSize = 80;
 		g.setColor(new Color(color % 255, color % 255, color % 255));

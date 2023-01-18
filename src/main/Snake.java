@@ -6,15 +6,28 @@ public class Snake {
 
 	static final int u = GamePanel.UNIT_SIZE;
 	final ArrayList<Point> body = new ArrayList<Point>();
-	Point lastTail = new Point();
-	int bodyParts = 12;
+	
+	public int headX;
+	public int headY;
 
+	private int speed = 10;
+	private int bodyParts = 12;
+	private Point lastTail;
+
+	private int goalX;
+	private int goalY;
+	
 	public Snake(Point head) {
 		init(head);
 	}
 
+	public void setGoal(int x, int y) {
+		goalX = x;
+		goalY = y;
+	}
+
 	public Point getHead() {
-		return new Point(body.get(0));
+		return new Point(headX, headY);
 	}
 
 	public void Grew() {
@@ -22,10 +35,8 @@ public class Snake {
 		body.add(lastTail);
 	}
 
-	public void move(Point mouse) {
-		Point h = getHead();
-
-		double distance = Math.hypot(h.x-mouse.x, h.y-mouse.y);
+	public void move() {
+		double distance = Math.hypot(headX-goalX, headY-goalY);
 		if (distance < u)
 			return;
 
@@ -34,8 +45,8 @@ public class Snake {
 		for (int i = bodyParts-1; i > 0; i--)
 			body.set(i, body.get(i - 1));
 
-		Point newHead = calcNewPoint(body.get(0), mouse);
-		body.set(0, newHead);
+		Point newHead = calcNewPoint(body.get(0));
+		setHead(newHead);
 	}
 
 	public void draw(Graphics g) {
@@ -46,25 +57,35 @@ public class Snake {
 
 	private void init(Point head) {
 		for (int i = 0; i < bodyParts; i++) {
-			body.add(new Point(head.x + u * i, head.y));
+			body.add(new Point(headX + u * i, headY));
 		}
-
+		setHead(head);
+	}
+	
+	public void setHead(Point head) {
+		headX = head.x;
+		headY = head.y;
+		if (body.size() > 0)
+			body.set(0, head);
 	}
 
-	private Point calcNewPoint(Point head, Point mouse) {
-	//	System.out.println(head.x + "," + head.y + "->" + mouse.x + "," + mouse.y);
-		double degree = 0;
-		if (head.x < mouse.x && head.y < mouse.y) {
-			degree = 360 - Math.toDegrees(Math.atan((double) (mouse.y - head.y) / (mouse.x - head.x)));
-		} else if (head.x > mouse.x && head.y > mouse.y) {
-			degree = 180 - Math.toDegrees(Math.atan((double) (head.y - mouse.y) / (head.x - mouse.x)));
-		} else if (head.y > mouse.y && head.x < mouse.x) {
-			degree = Math.toDegrees(Math.atan((double) (head.y - mouse.y) / (mouse.x - head.x)));
-		} else if (head.y < mouse.y && head.x > mouse.x) {
-			degree = 180 + Math.toDegrees(Math.atan((double) (mouse.y - head.y) / (head.x - mouse.x)));
+	private Point calcNewPoint(Point head) {
+		//	System.out.println(headX + "," + headY + "->" + mouse.x + "," + mouse.y);
+			double degree = 0;
+
+			if (headX < goalX && headY < goalY) {
+				degree = 360 - Math.toDegrees(Math.atan((double) (goalY - headY) / (goalX - headX)));
+			} else if (headX > goalX && headY > goalY) {
+				degree = 180 - Math.toDegrees(Math.atan((double) (headY - goalY) / (headX - goalX)));
+			} else if (headY > goalY && headX < goalX) {
+				degree = Math.toDegrees(Math.atan((double) (headY - goalY) / (goalX - headX)));
+			} else if (headY < goalY && headX > goalX) {
+				degree = 180 + Math.toDegrees(Math.atan((double) (goalY - headY) / (headX - goalX)));
+			}
+			
+			Point p = new Point((int) (headX + Math.cos(Math.toRadians(degree)) * speed),
+					(int) (headY - Math.sin(Math.toRadians(degree)) * speed));
+			return p;
 		}
-		Point p = new Point((int) (head.x + Math.cos(Math.toRadians(degree)) * 10),
-				(int) (head.y - Math.sin(Math.toRadians(degree)) * 10));
-		return p;
-	}
+
 }

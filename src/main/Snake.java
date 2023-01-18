@@ -9,16 +9,19 @@ public class Snake {
 	
 	public int headX;
 	public int headY;
+	public String name;
+
+	public int bodyParts = 12;
 
 	private int speed = 10;
-	private int bodyParts = 12;
 	private Point lastTail;
 
 	private int goalX;
 	private int goalY;
 	
-	public Snake(Point head) {
+	public Snake(Point head, String name) {
 		init(head);
+		this.name = name;
 	}
 
 	public void setGoal(int x, int y) {

@@ -39,7 +39,7 @@ public class MainFrame extends JFrame{
 
         mainPanel.add(gamePanel, "game");
         mainPanel.add(menuPanel, "menu");
-
+        
       
 		add(mainPanel);
 		pack();
@@ -49,6 +49,10 @@ public class MainFrame extends JFrame{
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 	    gamePanel.startGame();
+	}
+	
+	public String getPlayerName() {
+		return menuPanel.getPlayerName();
 	}
 	
 	

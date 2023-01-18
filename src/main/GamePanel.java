@@ -7,7 +7,7 @@ import java.util.*;
 import javax.swing.*;
 
 public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
-	MainFrame maniFrame;
+	MainFrame mainFrame;
 
 	static final int VIEW_WIDTH = 1400;
 	static final int VIEW_HEIGHT = 700;
@@ -24,31 +24,31 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
 	static final int FRUIT_COUNT = 100;
 	static final int FPS = 60;
 
-	static final Camera cam = new Camera(0, 0, 1, 1);
+	static final Camera cam = new Camera(0, 0);
 	Player player;
-	final Map<Integer, Snake> snakes = new HashMap<Integer, Snake>();
+	final static Map<Integer, Snake> snakes = new HashMap<Integer, Snake>();
 	final HashSet<Food> foods = new HashSet<Food>();
 
 	public BufferedImage backBuffer;
 
-	private Insets insets;
 	private Thread gameThread;
 	private final Object modelLock = new Object();
+    public static Leaderboard lb = new Leaderboard();
 
-	public GamePanel(MainFrame maniFrame) {
-		this.maniFrame = maniFrame;
+	public GamePanel(MainFrame mainFrame) {
+		this.mainFrame = mainFrame;
 		this.backBuffer = new BufferedImage(VIEW_WIDTH, VIEW_HEIGHT, BufferedImage.TYPE_INT_RGB);
-		;
+		
 
-		player = new Player(new Point(randomPoint()));
-		cam.Set(player);
+		player = new Player(new Point(randomPoint()), mainFrame.getPlayerName());
+		snakes.put(0, player);
+		cam.set(player);
 		setPreferredSize(new Dimension(VIEW_WIDTH, VIEW_HEIGHT));
 		this.setBackground(Color.black);
 		this.setFocusable(true);
 		setBackground(Color.BLACK);
 		addMouseMotionListener(this);
 
-		insets = getInsets();
 		startGame();
 	}
 
@@ -60,7 +60,7 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
 	@Override
 	public void paint(Graphics g) {
 		this.draw();
-		g.drawImage(backBuffer, insets.left, insets.top, this);
+		g.drawImage(backBuffer, 0, 0, this);
 	}
 
 	@Override
@@ -88,17 +88,19 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
 
 	@Override
 	public void mouseMoved(MouseEvent e) {
-		player.setGoal((int) (e.getX() / cam.scaleX + cam.x), (int) (e.getY() / cam.scaleY + cam.y));
+		player.setGoal((int) (e.getX() + cam.x), (int) (e.getY() + cam.y));
 	}
 
 	@Override
 	public void mouseDragged(MouseEvent e) {
 	}
+	
+
 
 	private void update() {
 
 		player.move();
-		cam.Set(player);
+		cam.set(player);
 
 		synchronized (modelLock) {
 			if (foods.size() < 2000) {
@@ -107,22 +109,23 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
 					;
 			}
 		}
-
+		lb.update();
 	}
 
 	private void draw() {
 
 		Graphics graphics = backBuffer.getGraphics();
+		Graphics g2 = backBuffer.getGraphics();
 
 		Graphics2D g = (Graphics2D) graphics;
 		
 		g.setColor(Color.BLACK);
 		g.fillRect(0, 0, VIEW_WIDTH, VIEW_HEIGHT);
-		
 		cam.turnOn(g);
 		this.drawBackground(g);
 
 		player.draw(g);
+
 		synchronized (modelLock) {
 			Iterator it = foods.iterator();
 			while (it.hasNext()) {
@@ -130,8 +133,10 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
 				f.draw(g);
 			}
 		}
-
+		
 		cam.turnOff(g);
+		lb.draw(g2);
+
 	}
 
 	private Point randomPoint() {

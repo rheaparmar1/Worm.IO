@@ -41,6 +41,7 @@ public class MenuPanel extends JPanel implements ActionListener, KeyListener, Fo
 	static JPanel myPanel;
 	JButton playButton, rulesButton;
 	JTextField nameTextArea;
+	String playerName;
 	JPanel centrePanel = new JPanel();
 	JLabel pbLabel;
 	int pb;
@@ -165,7 +166,9 @@ public class MenuPanel extends JPanel implements ActionListener, KeyListener, Fo
 		}
 		
 	}
-
+	public String getPlayerName() {
+		return nameTextArea.getText();
+	}
 	
 	public void focusGained(FocusEvent e) {
 		nameTextArea.setText("");

@@ -1,11 +1,8 @@
 package main;
 
 import java.awt.*;
-import java.util.HashMap;
-import java.util.Map;
 
 public class Food {
-	public static Map<Integer, Food> foods = new HashMap<Integer, Food>();
 
 	int x, y;
 	static final int size = GamePanel.UNIT_SIZE;

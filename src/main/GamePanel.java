@@ -24,7 +24,9 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
 	static final int FRUIT_COUNT = 100;
 	static final int FPS = 60;
 
+
 	static final Camera cam = new Camera(0, 0);
+	TileManager tileM = new TileManager(this);
 	Player player;
 	final static Map<Integer, Snake> snakes = new HashMap<Integer, Snake>();
 	final HashSet<Food> foods = new HashSet<Food>();
@@ -122,8 +124,8 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
 		g.setColor(Color.BLACK);
 		g.fillRect(0, 0, VIEW_WIDTH, VIEW_HEIGHT);
 		cam.turnOn(g);
-		this.drawBackground(g);
-
+		//this.drawBackground(g);
+		tileM.draw(g);
 		player.draw(g);
 
 		synchronized (modelLock) {

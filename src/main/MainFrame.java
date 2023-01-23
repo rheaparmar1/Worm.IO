@@ -20,14 +20,9 @@ public class MainFrame extends JFrame{
 
 
 	
-	JButton playButton, rulesButton;
-	JTextField nameTextArea;
-	JPanel centrePanel = new JPanel();
-	JLabel pb;
 	//ImageIcon play = new ImageIcon("play.jpg");
 	//ImageIcon rules = new ImageIcon("rules.jpg");
 	
-	static BufferedImage mainMenu;
 	
 	public MainFrame() {
 		cardLayout = new CardLayout();

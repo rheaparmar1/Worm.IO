@@ -27,6 +27,7 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
 
 	static final Camera cam = new Camera(0, 0);
 	TileManager tileM = new TileManager(this);
+	MiniMap miniMap = new MiniMap(this);
 	Player player;
 	final static Map<Integer, Snake> snakes = new HashMap<Integer, Snake>();
 	final HashSet<Food> foods = new HashSet<Food>();
@@ -118,11 +119,12 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
 
 		Graphics graphics = backBuffer.getGraphics();
 		Graphics g2 = backBuffer.getGraphics();
-
+		Graphics2D g3 = (Graphics2D) backBuffer.getGraphics();
 		Graphics2D g = (Graphics2D) graphics;
 		
 		g.setColor(Color.BLACK);
 		g.fillRect(0, 0, VIEW_WIDTH, VIEW_HEIGHT);
+		
 		cam.turnOn(g);
 		//this.drawBackground(g);
 		tileM.draw(g);
@@ -137,6 +139,7 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
 		}
 		
 		cam.turnOff(g);
+		miniMap.drawMiniMap(g3);
 		lb.draw(g2);
 
 	}

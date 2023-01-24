@@ -57,6 +57,12 @@ public class Snake {
 		for (Point p : body)
 			g.fillOval(p.x, p.y, u, u);
 	}
+	
+	public void drawHead(Graphics g) { //for minimap
+		g.setColor(Color.DARK_GRAY);
+		g.fillOval(headX, headY, u*70, u*70);
+			
+	}
 
 	private void init(Point head) {
 		for (int i = 0; i < bodyParts; i++) {

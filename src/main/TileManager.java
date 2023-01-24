@@ -40,8 +40,8 @@ public class TileManager {
 		int borderRow = (maxMapRow-maxScreenRow)/2;
 		
 		
-		int col = 0; //175 columns for tiles
-		int row = 0; //105 rows for tiles
+		int col = 0; 
+		int row = 0;
 		int x = 0;
 		int y = 0;
 		

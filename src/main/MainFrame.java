@@ -2,13 +2,12 @@ package main;
 import java.awt.CardLayout;
 import java.awt.Dimension;
 import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
 
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
+import javax.swing.*;
 
 public class MainFrame extends JFrame{
 	
@@ -17,7 +16,6 @@ public class MainFrame extends JFrame{
 	MenuPanel menuPanel;
 	GamePanel gamePanel;
 	CardLayout cardLayout;
-
 
 	
 	//ImageIcon play = new ImageIcon("play.jpg");
@@ -31,19 +29,18 @@ public class MainFrame extends JFrame{
 		//make panels
 		menuPanel = new MenuPanel(this);
 		gamePanel = new GamePanel(this);
-
-        mainPanel.add(gamePanel, "game");
         mainPanel.add(menuPanel, "menu");
+        mainPanel.add(gamePanel, "game");
+
+
         
-      
 		add(mainPanel);
 		pack();
 		setVisible(true);
 		setResizable(false);
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		
-	    gamePanel.startGame();
+	    //gamePanel.startGame();
 	}
 	
 	public String getPlayerName() {
@@ -54,10 +51,13 @@ public class MainFrame extends JFrame{
 	//switch to game panel
 	public void gameOn() {
 	    cardLayout.show(mainPanel, "game");
+	    gamePanel.startGame();
 	}
 	
 	//switch back to menu panel
 	public void gameOff() {
 	    cardLayout.show(mainPanel, "menu");
 	}
+
+
 }

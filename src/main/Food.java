@@ -17,6 +17,8 @@ public class Food {
 		int y = head.y;
 		return x < this.x + size && x + size > this.x && y < this.y + size && y + size > this.y;
 	}
+	
+
 
 	public void draw(Graphics g) {
 		g.setColor(Color.red);

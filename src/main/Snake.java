@@ -2,7 +2,7 @@ package main;
 import java.awt.*;
 import java.util.ArrayList;
 
-public class Snake {
+public class Snake{
 
 	static final int u = GamePanel.UNIT_SIZE;
 	final ArrayList<Point> body = new ArrayList<Point>();
@@ -19,9 +19,16 @@ public class Snake {
 	private int goalX;
 	private int goalY;
 	
-	public Snake(Point head, String name) {
+	public boolean isPlayer;
+	
+	public Snake(Point head, String name, boolean isPlayer) {
 		init(head);
 		this.name = name;
+		this.isPlayer = isPlayer;
+	}
+	
+	public String getName() {
+		return this.name;
 	}
 
 	public void setGoal(int x, int y) {
@@ -58,9 +65,10 @@ public class Snake {
 			g.fillOval(p.x, p.y, u, u);
 	}
 	
+	
 	public void drawHead(Graphics g) { //for minimap
 		g.setColor(Color.DARK_GRAY);
-		g.fillOval(headX, headY, u*70, u*70);
+		g.fillOval(headX-(u*35), headY-(u*35), u*70, u*70);
 			
 	}
 
@@ -96,5 +104,6 @@ public class Snake {
 					(int) (headY - Math.sin(Math.toRadians(degree)) * speed));
 			return p;
 		}
+
 
 }

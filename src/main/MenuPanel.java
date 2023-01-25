@@ -50,7 +50,6 @@ public class MenuPanel extends JPanel implements ActionListener, KeyListener, Fo
 	//final Dimension screen = new Dimension(Toolkit.getDefaultToolkit().getScreenSize());
 	static int width = 1400;
 	static int height = 700;
-	static String currentScreen = "main";
 
 	long currentTime;
 	static BufferedImage mainMenu;
@@ -109,9 +108,8 @@ public class MenuPanel extends JPanel implements ActionListener, KeyListener, Fo
 
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
-		if(currentScreen.equals("main")) { 
-			g.drawImage(mainMenu, 0, 0, null);
-		}
+		g.drawImage(mainMenu, 0, 0, null);
+		
 	}
 
 	public static int updatePB(int pb) {
@@ -153,7 +151,6 @@ public class MenuPanel extends JPanel implements ActionListener, KeyListener, Fo
 			else if(nameTextArea.getText().length() >= 12)
 				JOptionPane.showMessageDialog(null, "Entered name is too long. Try again.", "Name too long", JOptionPane.WARNING_MESSAGE);
 			else {
-				currentScreen = "play";
 				frame.gameOn();
 			}
 			
@@ -195,7 +192,6 @@ public class MenuPanel extends JPanel implements ActionListener, KeyListener, Fo
 			if(nameTextArea.getText().length() >= 12)
 				JOptionPane.showMessageDialog(null, "Entered name is too long. Try again.", "Name too long", JOptionPane.WARNING_MESSAGE);
 			else {
-				currentScreen = "play";
 				frame.gameOn();
 			}
 		}

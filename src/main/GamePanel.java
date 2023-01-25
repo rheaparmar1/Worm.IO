@@ -23,7 +23,8 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
 	static final int UNIT_SIZE = 10;
 	static final int FRUIT_COUNT = 100;
 	static final int FPS = 60;
-
+	static String playerName;
+	private boolean runGame = false;
 
 	static final Camera cam = new Camera(0, 0);
 	TileManager tileM = new TileManager(this);
@@ -42,9 +43,8 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
 		this.mainFrame = mainFrame;
 		this.backBuffer = new BufferedImage(VIEW_WIDTH, VIEW_HEIGHT, BufferedImage.TYPE_INT_RGB);
 		
-
-		player = new Player(new Point(randomPoint()), mainFrame.getPlayerName());
-		snakes.put(0, player);
+		player = new Player(new Point(randomPoint()), mainFrame.getPlayerName(), true); //create player
+		snakes.put(0, player); //player always index 0 in map
 		cam.set(player);
 		setPreferredSize(new Dimension(VIEW_WIDTH, VIEW_HEIGHT));
 		this.setBackground(Color.black);
@@ -52,12 +52,28 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
 		setBackground(Color.BLACK);
 		addMouseMotionListener(this);
 
-		startGame();
+        InputMap inputMap = this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "escapeAction");
+        Action escapeAction = new AbstractAction() {
+            public void actionPerformed(ActionEvent e) {
+            	stopGame();
+    			mainFrame.gameOff();
+        	}
+
+        };
+        ActionMap actionMap = this.getActionMap();
+        actionMap.put("escapeAction", escapeAction);
 	}
 
 	public void startGame() {
 		this.gameThread = new Thread(this);
 		this.gameThread.start();
+		runGame = true;
+	}
+	
+	public void stopGame() {
+		runGame = false;
+		this.gameThread = null;
 	}
 
 	@Override
@@ -69,22 +85,24 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
 	@Override
 	public void run() {
 		// game loop
-		double drawInterval = 1000000000 / FPS;
-		double nextDrawTime = System.nanoTime() + drawInterval;
-		while (true) {
-
-			update();
-			checkCollision();
-			repaint();
-
-			try {
-				double sleepTime = nextDrawTime - System.nanoTime();
-				if (sleepTime < 0)
-					sleepTime = 0;
-				Thread.sleep((long) sleepTime / 1000000);
-				nextDrawTime += drawInterval;
-			} catch (InterruptedException e) {
-				e.printStackTrace();
+		while(runGame) {
+			double drawInterval = 1000000000 / FPS;
+			double nextDrawTime = System.nanoTime() + drawInterval;
+			while (true) {
+	
+				update();
+				checkCollision();
+				repaint();
+	
+				try {
+					double sleepTime = nextDrawTime - System.nanoTime();
+					if (sleepTime < 0)
+						sleepTime = 0;
+					Thread.sleep((long) sleepTime / 1000000);
+					nextDrawTime += drawInterval;
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 	}
@@ -130,10 +148,12 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
 		tileM.draw(g);
 		player.draw(g);
 
+		
+		
 		synchronized (modelLock) {
-			Iterator it = foods.iterator();
+			Iterator<Food> it = foods.iterator();
 			while (it.hasNext()) {
-				Food f = (Food) it.next();
+				Food f = it.next();
 				f.draw(g);
 			}
 		}
@@ -141,7 +161,6 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
 		cam.turnOff(g);
 		miniMap.drawMiniMap(g3);
 		lb.draw(g2);
-
 	}
 
 	private Point randomPoint() {
@@ -158,32 +177,38 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
 
 		}
 		synchronized (modelLock) {
-			Iterator it = foods.iterator();
+			Iterator<Food> it = foods.iterator();
 			while (it.hasNext()) {
-				Food f = (Food) it.next();
+				Food f = it.next();
 				if (f.checkCollide(h)) {
 					player.Grew();
-					it.remove();
+					Point newPoint = randomPoint();
+					f.x = newPoint.x;
+					f.y = newPoint.y;
 				}
 			}
+			
 		}
+		
+		
 
 	}
 
-	private void drawBackground(Graphics g) {
+//	private void drawBackground(Graphics g) {
+//
+//		g.setColor(new Color(125, 125, 125));
+//		g.fillRect(0, 0, mapBottomRight.x, topLeft.y);
+//		g.fillRect(0, bottomRight.y, mapBottomRight.x, mapBottomRight.y);
+//		g.fillRect(0, 0, topLeft.x, mapBottomRight.y);
+//		g.fillRect(bottomRight.x, 0, mapBottomRight.x, mapBottomRight.y);
+//
+//		int color = 87;
+//		int tileSize = 80;
+//		g.setColor(new Color(color % 255, color % 255, color % 255));
+//		for (int j = 0; j <= BOARD_HEIGHT + VIEW_HEIGHT; j += tileSize)
+//		g.drawLine(0, j, BOARD_WIDTH + VIEW_WIDTH, j);
+//		for (int i = 0; i <= BOARD_WIDTH + VIEW_WIDTH; i += tileSize)
+//		g.drawLine(i, 0, i, BOARD_HEIGHT + VIEW_HEIGHT);
+//	}
 
-		g.setColor(new Color(125, 125, 125));
-		g.fillRect(0, 0, mapBottomRight.x, topLeft.y);
-		g.fillRect(0, bottomRight.y, mapBottomRight.x, mapBottomRight.y);
-		g.fillRect(0, 0, topLeft.x, mapBottomRight.y);
-		g.fillRect(bottomRight.x, 0, mapBottomRight.x, mapBottomRight.y);
-
-		int color = 87;
-		int tileSize = 80;
-		g.setColor(new Color(color % 255, color % 255, color % 255));
-		for (int j = 0; j <= BOARD_HEIGHT + VIEW_HEIGHT; j += tileSize)
-		g.drawLine(0, j, BOARD_WIDTH + VIEW_WIDTH, j);
-		for (int i = 0; i <= BOARD_WIDTH + VIEW_WIDTH; i += tileSize)
-		g.drawLine(i, 0, i, BOARD_HEIGHT + VIEW_HEIGHT);
-	}
 }

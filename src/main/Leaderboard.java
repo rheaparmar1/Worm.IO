@@ -41,22 +41,26 @@ public class Leaderboard{
 		    g.drawRect(0, y + table[i], 125, 30);
 		    g.fillRect(0, y + table[i], 125, 30);
 		    g.setColor(Color.WHITE);
-	        if(GamePanel.snakes.size()>i) {
+	        if(GamePanel.snakes.size()>i)
 	            g.drawString("#" + (i + 1) + ": " + snakesCopy.get(i).name + " : " + (int) snakesCopy.get(i).bodyParts, x, y + table[i] + 25);
-	        }
 	    }
 	    
-	    playerInfo(g);
+	    
 	}
 	
-	public void playerInfo(Graphics g) {
+	public int[] playerInfo(Graphics g) {
+		int[] playerInfo = new int[2];
+		playerInfo[0] = snakesCopy.get(currentRank).bodyParts;
+		playerInfo[1] = currentRank + 1;
 		g.setColor(new Color(50, 50, 50, 128));
         g.drawRect(0, 700-125, 125, 50);
         g.fillRect(0, 700-125, 125, 50);
         g.setColor(Color.WHITE);
       
-        g.drawString("Your length is " + snakesCopy.get(currentRank).bodyParts, 0, 700-105);
-        g.drawString("Rank " + (currentRank+1) + " out of " + snakesCopy.size(), 0, 700-85);
+        g.drawString("Your length is " + playerInfo[0], 0, 700-105);
+        g.drawString("Rank " + playerInfo[1] + " out of " + snakesCopy.size(), 0, 700-85);
+        
+        return playerInfo;
 	}
 
 	

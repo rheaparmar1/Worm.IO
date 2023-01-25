@@ -3,7 +3,12 @@ package main;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
+import java.util.Map.Entry;
+
+import javax.imageio.ImageIO;
 import javax.swing.*;
 
 public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
@@ -24,7 +29,10 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
 	static final int FRUIT_COUNT = 100;
 	static final int FPS = 60;
 	static String playerName;
+	private int[] playerInfo = new int[2];
+
 	private boolean runGame = false;
+	private boolean lose = false;
 
 	static final Camera cam = new Camera(0, 0);
 	TileManager tileM = new TileManager(this);
@@ -34,6 +42,7 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
 	final HashSet<Food> foods = new HashSet<Food>();
 
 	public BufferedImage backBuffer;
+	private BufferedImage loseScreen;
 
 	private Thread gameThread;
 	private final Object modelLock = new Object();
@@ -42,6 +51,12 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
 	public GamePanel(MainFrame mainFrame) {
 		this.mainFrame = mainFrame;
 		this.backBuffer = new BufferedImage(VIEW_WIDTH, VIEW_HEIGHT, BufferedImage.TYPE_INT_RGB);
+		
+		try { // Load images
+			loseScreen = ImageIO.read(new File("screens/losescreen.png"));		
+		} catch (IOException e) {
+			System.out.println("File cannot be found"); 
+		}
 		
 		player = new Player(new Point(randomPoint()), mainFrame.getPlayerName(), true); //create player
 		snakes.put(0, player); //player always index 0 in map
@@ -58,6 +73,8 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
             public void actionPerformed(ActionEvent e) {
             	stopGame();
     			mainFrame.gameOff();
+    			reset();
+
         	}
 
         };
@@ -74,13 +91,11 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
 	public void stopGame() {
 		runGame = false;
 		this.gameThread = null;
+		if(lose) {
+			repaint();
+		}
 	}
 
-	@Override
-	public void paint(Graphics g) {
-		this.draw();
-		g.drawImage(backBuffer, 0, 0, this);
-	}
 
 	@Override
 	public void run() {
@@ -92,24 +107,32 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
 	
 				update();
 				checkCollision();
-				repaint();
-	
-				try {
-					double sleepTime = nextDrawTime - System.nanoTime();
-					if (sleepTime < 0)
-						sleepTime = 0;
-					Thread.sleep((long) sleepTime / 1000000);
-					nextDrawTime += drawInterval;
-				} catch (InterruptedException e) {
-					e.printStackTrace();
+				if(!lose) {
+					repaint();
+					
+					try {
+						double sleepTime = nextDrawTime - System.nanoTime();
+						if (sleepTime < 0)
+							sleepTime = 0;
+						Thread.sleep((long) sleepTime / 1000000);
+						nextDrawTime += drawInterval;
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
 				}
+				else
+					break;
+				
 			}
 		}
+		
+		
 	}
 
 	@Override
 	public void mouseMoved(MouseEvent e) {
-		player.setGoal((int) (e.getX() + cam.x), (int) (e.getY() + cam.y));
+		if(!lose)
+			player.setGoal((int) (e.getX() + cam.x), (int) (e.getY() + cam.y));
 	}
 
 	@Override
@@ -133,23 +156,22 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
 		lb.update();
 	}
 
-	private void draw() {
-
+	@Override
+	public void paint(Graphics g4) {
 		Graphics graphics = backBuffer.getGraphics();
 		Graphics g2 = backBuffer.getGraphics();
 		Graphics2D g3 = (Graphics2D) backBuffer.getGraphics();
 		Graphics2D g = (Graphics2D) graphics;
+	
 		
 		g.setColor(Color.BLACK);
-		g.fillRect(0, 0, VIEW_WIDTH, VIEW_HEIGHT);
+		g.fillRect(0, 0, VIEW_WIDTH, VIEW_HEIGHT);	
 		
 		cam.turnOn(g);
-		//this.drawBackground(g);
 		tileM.draw(g);
 		player.draw(g);
 
-		
-		
+
 		synchronized (modelLock) {
 			Iterator<Food> it = foods.iterator();
 			while (it.hasNext()) {
@@ -159,9 +181,29 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
 		}
 		
 		cam.turnOff(g);
-		miniMap.drawMiniMap(g3);
-		lb.draw(g2);
+
+		if(lose) {
+			drawLoseScreen(g2);
+		}
+		else {
+			miniMap.drawMiniMap(g3);
+			lb.draw(g2);
+			playerInfo = lb.playerInfo(g2);
+		}
+
+		g4.drawImage(backBuffer, 0, 0, this);
 	}
+	
+	private void reset() {
+		lose = false;
+		Iterator it = snakes.entrySet().iterator();
+		while (it.hasNext()) {
+		    Entry item = (Entry) it.next();
+		    it.remove();
+		}
+		foods.removeAll(foods);
+	}
+
 
 	private Point randomPoint() {
 		Point p = new Point(0, 0);
@@ -174,24 +216,40 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
 		Point h = player.getHead();
 		if (h.x < topLeft.x || h.x + UNIT_SIZE > bottomRight.x
 				|| h.y < topLeft.y || h.y + UNIT_SIZE > bottomRight.y) {
-
-		}
-		synchronized (modelLock) {
-			Iterator<Food> it = foods.iterator();
-			while (it.hasNext()) {
-				Food f = it.next();
-				if (f.checkCollide(h)) {
-					player.Grew();
-					Point newPoint = randomPoint();
-					f.x = newPoint.x;
-					f.y = newPoint.y;
-				}
-			}
+			lose = true;
+			stopGame();
 			
 		}
-		
+		if(!lose) {
+			synchronized (modelLock) {
+				Iterator<Food> it = foods.iterator();
+				while (it.hasNext()) {
+					Food f = it.next();
+					if (f.checkCollide(h)) {
+						player.Grew();
+						Point newPoint = randomPoint();
+						f.x = newPoint.x;
+						f.y = newPoint.y;
+					}
+				}
+				
+			}
+		}
 		
 
+	}
+	
+	private void drawLoseScreen(Graphics g) {
+		g.setColor(new Color(50, 50, 50, 128));
+		g.drawRect(VIEW_WIDTH/3, VIEW_HEIGHT/4, VIEW_WIDTH/3, VIEW_HEIGHT/2);
+	    g.fillRect(VIEW_WIDTH/3, VIEW_HEIGHT/4, VIEW_WIDTH/3, VIEW_HEIGHT/2);
+	    g.setColor(Color.WHITE);
+		g.drawImage(loseScreen, VIEW_WIDTH/3, VIEW_HEIGHT/4, null);
+		g.setFont(new Font("Helvetica", Font.PLAIN, 24));
+		g.drawString("Your length was " + playerInfo[0], VIEW_WIDTH/3+130, VIEW_HEIGHT/4+165);
+		g.drawString("Your rank was " + playerInfo[1], VIEW_WIDTH/3+150, VIEW_HEIGHT/4+200);
+
+	    
 	}
 
 //	private void drawBackground(Graphics g) {

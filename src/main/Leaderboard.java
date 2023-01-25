@@ -12,6 +12,7 @@ import java.util.Set;
 
 
 
+public class Leaderboard{
 	private int x;
   	private int y;
 	int[] table = new int[10];

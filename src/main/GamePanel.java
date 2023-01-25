@@ -3,8 +3,7 @@ package main;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -28,39 +27,40 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
 	static final int UNIT_SIZE = 10;
 	static final int FRUIT_COUNT = 100;
 	static final int FPS = 60;
-	static String playerName;
-	private int[] playerInfo = new int[2];
 
+	private static final Camera cam = new Camera(0, 0);
+	private final Object modelLock = new Object();
+	private Thread gameThread;
+    private Leaderboard lb = new Leaderboard(this);
+    
+	public Player player;
+	public MiniMap miniMap = new MiniMap(this);
+    public TileManager tileM = new TileManager(this);
+
+	
+	private BufferedImage backBuffer;
+	private BufferedImage loseScreen;
+	
+	static Map<Integer, Snake> snakes = new HashMap<Integer, Snake>();
+	static HashSet<Food> foods = new HashSet<Food>();
+
+	private int[] playerInfo = new int[2];
 	private boolean runGame = false;
 	private boolean lose = false;
+	int pB;
 
-	static final Camera cam = new Camera(0, 0);
-	TileManager tileM = new TileManager(this);
-	MiniMap miniMap = new MiniMap(this);
-	Player player;
-	final static Map<Integer, Snake> snakes = new HashMap<Integer, Snake>();
-	final HashSet<Food> foods = new HashSet<Food>();
-
-	public BufferedImage backBuffer;
-	private BufferedImage loseScreen;
-
-	private Thread gameThread;
-	private final Object modelLock = new Object();
-    public static Leaderboard lb = new Leaderboard();
-
+	
 	public GamePanel(MainFrame mainFrame) {
 		this.mainFrame = mainFrame;
 		this.backBuffer = new BufferedImage(VIEW_WIDTH, VIEW_HEIGHT, BufferedImage.TYPE_INT_RGB);
 		
-		try { // Load images
+		try { //load game over image
 			loseScreen = ImageIO.read(new File("screens/losescreen.png"));		
 		} catch (IOException e) {
 			System.out.println("File cannot be found"); 
 		}
+				
 		
-		player = new Player(new Point(randomPoint()), mainFrame.getPlayerName(), true); //create player
-		snakes.put(0, player); //player always index 0 in map
-		cam.set(player);
 		setPreferredSize(new Dimension(VIEW_WIDTH, VIEW_HEIGHT));
 		this.setBackground(Color.black);
 		this.setFocusable(true);
@@ -74,28 +74,41 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
             	stopGame();
     			mainFrame.gameOff();
     			reset();
-
         	}
-
         };
         ActionMap actionMap = this.getActionMap();
         actionMap.put("escapeAction", escapeAction);
 	}
 
 	public void startGame() {
+		player = new Player(new Point(randomPoint()), mainFrame.getPlayerName(), true); //create player
+		snakes.put(0, player); //player always map index 0
+		cam.set(player);
+		
 		this.gameThread = new Thread(this);
 		this.gameThread.start();
 		runGame = true;
+
 	}
 	
 	public void stopGame() {
 		runGame = false;
+		pB = playerInfo[0];
 		this.gameThread = null;
 		if(lose) {
 			repaint();
 		}
 	}
-
+	
+	private void reset() {
+		lose = false;
+		Iterator it = snakes.entrySet().iterator();
+		while (it.hasNext()) {
+		    Entry item = (Entry) it.next();
+		    it.remove();
+		}
+		foods.removeAll(foods);
+	}
 
 	@Override
 	public void run() {
@@ -128,18 +141,6 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
 		
 		
 	}
-
-	@Override
-	public void mouseMoved(MouseEvent e) {
-		if(!lose)
-			player.setGoal((int) (e.getX() + cam.x), (int) (e.getY() + cam.y));
-	}
-
-	@Override
-	public void mouseDragged(MouseEvent e) {
-	}
-	
-
 
 	private void update() {
 
@@ -193,25 +194,19 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
 
 		g4.drawImage(backBuffer, 0, 0, this);
 	}
+
+
 	
-	private void reset() {
-		lose = false;
-		Iterator it = snakes.entrySet().iterator();
-		while (it.hasNext()) {
-		    Entry item = (Entry) it.next();
-		    it.remove();
-		}
-		foods.removeAll(foods);
-	}
-
-
-	private Point randomPoint() {
-		Point p = new Point(0, 0);
-		p.x = (int) (Math.random() * (MAP_WIDTH - VIEW_WIDTH - UNIT_SIZE) + BORDER_WIDTH);
-		p.y = (int) (Math.random() * (MAP_HEIGHT - VIEW_HEIGHT - UNIT_SIZE) + BORDER_HEIGHT);
-		return p;
-	}
-
+//	private void addNewPB() {
+//		try {
+//			PrintWriter outFile = new PrintWriter(new FileWriter("pb.txt", true));
+//			outFile.append("\nplayerInfo[0]");
+//		} catch (IOException e) {
+//			System.out.println("File error");
+//		}
+//		
+//	}
+	
 	private void checkCollision() {
 		Point h = player.getHead();
 		if (h.x < topLeft.x || h.x + UNIT_SIZE > bottomRight.x
@@ -235,8 +230,14 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
 				
 			}
 		}
-		
 
+	}
+	
+	private Point randomPoint() {
+		Point p = new Point(0, 0);
+		p.x = (int) (Math.random() * (MAP_WIDTH - VIEW_WIDTH - UNIT_SIZE) + BORDER_WIDTH);
+		p.y = (int) (Math.random() * (MAP_HEIGHT - VIEW_HEIGHT - UNIT_SIZE) + BORDER_HEIGHT);
+		return p;
 	}
 	
 	private void drawLoseScreen(Graphics g) {
@@ -251,22 +252,14 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
 
 	    
 	}
+	
+	@Override
+	public void mouseMoved(MouseEvent e) {
+		if(!lose)
+			player.setGoal((int) (e.getX() + cam.x), (int) (e.getY() + cam.y));
+	}
 
-//	private void drawBackground(Graphics g) {
-//
-//		g.setColor(new Color(125, 125, 125));
-//		g.fillRect(0, 0, mapBottomRight.x, topLeft.y);
-//		g.fillRect(0, bottomRight.y, mapBottomRight.x, mapBottomRight.y);
-//		g.fillRect(0, 0, topLeft.x, mapBottomRight.y);
-//		g.fillRect(bottomRight.x, 0, mapBottomRight.x, mapBottomRight.y);
-//
-//		int color = 87;
-//		int tileSize = 80;
-//		g.setColor(new Color(color % 255, color % 255, color % 255));
-//		for (int j = 0; j <= BOARD_HEIGHT + VIEW_HEIGHT; j += tileSize)
-//		g.drawLine(0, j, BOARD_WIDTH + VIEW_WIDTH, j);
-//		for (int i = 0; i <= BOARD_WIDTH + VIEW_WIDTH; i += tileSize)
-//		g.drawLine(i, 0, i, BOARD_HEIGHT + VIEW_HEIGHT);
-//	}
-
+	@Override
+	public void mouseDragged(MouseEvent e) {
+	}
 }

@@ -24,7 +24,6 @@ public class MiniMap extends TileManager{
 		Graphics graphics = original.getGraphics();
 		Graphics2D g1 = (Graphics2D) graphics;
 		
-
 		gp.tileM.draw(g1);
 		gp.player.drawHead(g1);
 		

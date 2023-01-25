@@ -112,12 +112,12 @@ public class MenuPanel extends JPanel implements ActionListener, KeyListener, Fo
 		
 	}
 
-	public static int updatePB(int pb) {
+	public int updatePB(int pb) {
 		BufferedReader inFile;
 		int currentPB=-1;
 		try {
 			inFile = new BufferedReader(new FileReader("pb.txt"));
-			currentPB=Integer.parseInt(inFile.readLine());
+			currentPB = Integer.parseInt(inFile.readLine());
 			inFile.close();
 		}
 		catch (FileNotFoundException e) {
@@ -128,9 +128,10 @@ public class MenuPanel extends JPanel implements ActionListener, KeyListener, Fo
 		
 		if (pb>currentPB) {
 			try {
-				PrintWriter outFile = new PrintWriter (new FileWriter ("pb.txt"));
-				outFile.println (pb);
-				outFile.close ();
+				PrintWriter outFile = new PrintWriter(new FileWriter("pb.txt", true));
+				outFile.println(pb);
+				outFile.close();
+				pbLabel.setText("Your personal best is " + pb + "!");
 				return pb;
 			}
 			catch (IOException e ) {
@@ -140,20 +141,35 @@ public class MenuPanel extends JPanel implements ActionListener, KeyListener, Fo
 		}
 		else
 			return currentPB;
-
+	}
+	
+	private boolean checkName() {
+		boolean isValid = false;
+		if(nameTextArea.getText().equals("enter name...")) 
+			JOptionPane.showMessageDialog(null, "Enter name to play. Try again.", "Enter Name", JOptionPane.WARNING_MESSAGE);
+		else if(nameTextArea.getText().length() >= 12)
+			JOptionPane.showMessageDialog(null, "Entered name is too long. Try again.", "Name too long", JOptionPane.WARNING_MESSAGE);
+		else {
+			isValid = true;
+		}
+		return isValid;
 	}
 
+	public void keyPressed(KeyEvent e) {
+		int key = e.getKeyCode();
+		String name = e.getComponent().getName();
+		if(key == KeyEvent.VK_ENTER && name.equals("name")) {
+			if(checkName())
+				frame.gameOn();
+			
+		}
+	}
+	
 	public void actionPerformed(ActionEvent e) {
 		String event = e.getActionCommand();
 		if(event.equals("play")) {
-			if(nameTextArea.getText().equals("enter name...")) 
-				JOptionPane.showMessageDialog(null, "Enter name to play. Try again.", "Enter Name", JOptionPane.WARNING_MESSAGE);
-			else if(nameTextArea.getText().length() >= 12)
-				JOptionPane.showMessageDialog(null, "Entered name is too long. Try again.", "Name too long", JOptionPane.WARNING_MESSAGE);
-			else {
+			if(checkName())
 				frame.gameOn();
-			}
-			
 		}
 		else if(event.equals("rules")) {
 			JOptionPane.showMessageDialog(null, "Use your mousepad/mouse to pilot your snake around the map to eat food and grow. \n"
@@ -161,7 +177,6 @@ public class MenuPanel extends JPanel implements ActionListener, KeyListener, Fo
 					+ "The objective is to be the largest snake in length. ", "How To Play", JOptionPane.PLAIN_MESSAGE);
 
 		}
-		
 	}
 	public String getPlayerName() {
 		return nameTextArea.getText();
@@ -185,17 +200,7 @@ public class MenuPanel extends JPanel implements ActionListener, KeyListener, Fo
 		
 	}
 
-	public void keyPressed(KeyEvent e) {
-		int key = e.getKeyCode();
-		String name = e.getComponent().getName();
-		if(key == KeyEvent.VK_ENTER && name.equals("name")) {
-			if(nameTextArea.getText().length() >= 12)
-				JOptionPane.showMessageDialog(null, "Entered name is too long. Try again.", "Name too long", JOptionPane.WARNING_MESSAGE);
-			else {
-				frame.gameOn();
-			}
-		}
-	}
+
 	@Override
 	public void keyReleased(KeyEvent e) {
 		// TODO Auto-generated method stub

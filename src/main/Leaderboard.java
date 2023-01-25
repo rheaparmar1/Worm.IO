@@ -13,6 +13,8 @@ import java.util.Set;
 
 
 public class Leaderboard{
+	GamePanel gp;
+
 	private int x;
   	private int y;
 	int[] table = new int[10];
@@ -21,7 +23,8 @@ public class Leaderboard{
 	List<Snake> snakesCopy;
 	int currentRank;
 	
-	public Leaderboard() {
+	public Leaderboard(GamePanel gp) {
+		this.gp = gp;
 		for(int i = 0; i < 10; i++) {
 			table[i] = tableY;
 			tableY+=30;
@@ -53,12 +56,12 @@ public class Leaderboard{
 		playerInfo[0] = snakesCopy.get(currentRank).bodyParts;
 		playerInfo[1] = currentRank + 1;
 		g.setColor(new Color(50, 50, 50, 128));
-        g.drawRect(0, 700-125, 125, 50);
-        g.fillRect(0, 700-125, 125, 50);
+        g.drawRect(0, GamePanel.VIEW_HEIGHT-125, 125, 50);
+        g.fillRect(0, GamePanel.VIEW_HEIGHT-125, 125, 50);
         g.setColor(Color.WHITE);
       
-        g.drawString("Your length is " + playerInfo[0], 0, 700-105);
-        g.drawString("Rank " + playerInfo[1] + " out of " + snakesCopy.size(), 0, 700-85);
+        g.drawString("Your length is " + playerInfo[0], 0, GamePanel.VIEW_HEIGHT-105);
+        g.drawString("Rank " + playerInfo[1] + " out of " + snakesCopy.size(), 0, GamePanel.VIEW_HEIGHT-85);
         
         return playerInfo;
 	}

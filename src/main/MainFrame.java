@@ -56,6 +56,8 @@ public class MainFrame extends JFrame{
 	
 	//switch back to menu panel
 	public void gameOff() {
+		System.out.println(gamePanel.pB);
+		menuPanel.updatePB(gamePanel.pB);
 	    cardLayout.show(mainPanel, "menu");
 	}
 

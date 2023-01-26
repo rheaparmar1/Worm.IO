@@ -13,7 +13,7 @@ public class SnakeBot extends Snake{
 	}
 	public void drawHead(Graphics g) { //for minimap
 		g.setColor(Color.MAGENTA);
-		g.fillOval(headX-(u*35), headY-(u*35), u*20, u*20);
+		g.fillOval(headX-(u*10), headY-(u*10), u*20, u*20);
 			
 	}
 	

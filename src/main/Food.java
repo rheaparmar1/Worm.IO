@@ -12,7 +12,7 @@ public class Food extends Point {
 	}
 	
 
-	public boolean checkCollide(Point head) {
+	public boolean checkFoodCollide(Point head) {
 		int x = head.x;
 		int y = head.y;
 		return x < this.x + size && x + size > this.x && y < this.y + size && y + size > this.y;

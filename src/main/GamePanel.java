@@ -24,6 +24,9 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
 	static final Point mapBottomRight = new Point(BOARD_WIDTH + VIEW_WIDTH, BOARD_HEIGHT + VIEW_HEIGHT);
 	static final int UNIT_SIZE = 10;
 	static final int FRUIT_COUNT = 100;
+	static final int SNAKE_COUNT = 100;
+	static final int FOOD_COUNT = 2000;
+	
 	static final int FPS = 60;
 	public int pB;
 	public int botCounter = 1;
@@ -129,12 +132,12 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
 		cam.focus(player); //move view screen to centre on player
 		
 	
-		if(snakes.size() < 100) {//3 for now
+		if(snakes.size() < SNAKE_COUNT) {//3 for now
 			snakes.put(botCounter, new SnakeBot(randomPoint(), botCounter));
 			botCounter++;
 		}
 	
-		for(Entry<Integer, Snake> entry: GamePanel.snakes.entrySet()) {
+		for(Entry<Integer, Snake> entry: snakes.entrySet()) {
 			if(entry.getKey() != 0) {
 				SnakeBot sB = (SnakeBot) entry.getValue();
 				TargetPoint tP = sB.findNearestFood(foods);
@@ -145,7 +148,7 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
 
 		}
 		
-		if (foods.size() < 2000) {
+		if (foods.size() < FOOD_COUNT) {
 			Food newFood = new Food(randomPoint());
 			while (!foods.add(newFood))
 				;
@@ -166,7 +169,7 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
 		
 		cam.turnOn(gB);
 		tiles.draw(gB);
-		for(Entry<Integer, Snake> entry: GamePanel.snakes.entrySet()) {
+		for(Entry<Integer, Snake> entry: snakes.entrySet()) {
 			Snake s = entry.getValue();
 			s.draw(gB);
 
@@ -201,7 +204,17 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
 		    it.remove();
 		}
 		foods.removeAll(foods);
-	
+//		for (int x = 0;x < 10; x++) {
+//            for (int y = 0; y < 10;y++) {
+//                if (x == 5 && y == 5)
+//                    player = new Player(new Point(350+x*700, 210+y*420), mainFrame.getPlayerName()); //create player
+//                else {
+//                    snakes.put(botCounter, new SnakeBot(new Point(350+x*700, 210+y*420), botCounter));
+//                    botCounter++;
+//                }
+//            }
+//		}
+		
 		player = new Player(new Point(randomPoint()), mainFrame.getPlayerName()); //create player
 		snakes.put(0, player); //player always at map index 0
 		cam.focus(player);
@@ -221,7 +234,7 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
 			Iterator<Food> it = foods.iterator();
 			while (it.hasNext()) {
 				Food f = it.next();
-				if (f.checkCollide(h)) {
+				if (f.checkFoodCollide(h)) {
 					player.Grew();
 					Point newPoint = randomPoint();
 					f.x = newPoint.x;
@@ -230,14 +243,14 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
 			}
 		}
 
-		for(Entry<Integer, Snake> entry: GamePanel.snakes.entrySet()) {
+		for(Entry<Integer, Snake> entry: snakes.entrySet()) {
 			if(entry.getKey() != 0) {
 				SnakeBot sB = (SnakeBot) entry.getValue();
-				Point botH = sB.getHead();
+				Point botH = sB.getHead(); //bot head with food
 				Iterator<Food> it = foods.iterator();
 				while (it.hasNext()) {
 					Food f = it.next();
-					if (f.checkCollide(botH)) {
+					if (f.checkFoodCollide(botH)) {
 						sB.Grew();
 						Point newPoint = randomPoint();
 						f.x = newPoint.x;
@@ -245,9 +258,29 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
 					}
 				}
 			}
-			
-
 		}
+		
+		//body collision
+
+		Iterator<Entry<Integer, Snake>> it = snakes.entrySet().iterator();
+		while (it.hasNext()) {
+			Map.Entry<Integer, Snake> pair = it.next();
+		    Snake s = pair.getValue();
+		    int key = pair.getKey();
+		    System.out.println(snakes.size()+"!!!");
+		    if(s.checkBodyCollide(key, snakes)) {
+		    	if(s.isPlayer) {
+		    		lose = true;
+		    		stopGame();
+		    	}
+		    	else {
+		    		
+		    		System.out.println(key + " is dead");;
+		    		it.remove();
+		    	}
+			}
+		}	
+		
 	}
 	
 	//Description: The method generate random point on board

@@ -1,4 +1,4 @@
-//get view map (the map shown on screen) from the board map (the world the snake can be on)
+//This class gets the view image/coordinates (the part of map shown on screen) from the game board map (the world the snake can be on)
 package main;
 
 import java.awt.*;

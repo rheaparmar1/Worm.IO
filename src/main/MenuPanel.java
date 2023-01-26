@@ -1,50 +1,24 @@
 package main;
-import java.awt.BorderLayout;
-import java.awt.CardLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.Insets;
-import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
 
+import java.awt.*;
+import java.awt.event.*;
+import java.awt.image.BufferedImage;
+import java.io.*;
 import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
+import javax.swing.*;
 
 public class MenuPanel extends JPanel implements ActionListener, KeyListener, FocusListener {
 	//Variables
 	private MainFrame frame;
 	private CardLayout cardLayout;
 
-	private JButton playButton, rulesButton;
+	private JButton playButton, rulesButton, aboutButton;
 	private JTextField nameTextArea;
 	private JLabel pbLabel;
 	private int pb;
 	private ImageIcon play = new ImageIcon("buttons/play.png");
 	private ImageIcon rules = new ImageIcon("buttons/rules.png");
+	private ImageIcon about = new ImageIcon("buttons/about.png");
 	private static int width = 1400;
 	private static int height = 700;
 	private static BufferedImage mainMenu;
@@ -77,21 +51,25 @@ public class MenuPanel extends JPanel implements ActionListener, KeyListener, Fo
 		nameTextArea.addKeyListener(this);
 		
 		playButton = new JButton(play);
-		playButton.setFont(new Font("Helvetica",Font.BOLD,17));
 		playButton.setBounds((width-200)/2, 410, 200, 60);
 		playButton.setActionCommand("play");
 		playButton.addActionListener(this);
 		
 		rulesButton = new JButton(rules);
-		rulesButton.setFont(new Font("Helvetica",Font.BOLD,17));
 		rulesButton.setBounds((width-200)/2, 490, 200, 60);
 		rulesButton.setActionCommand("rules");
 		rulesButton.addActionListener(this);
+		
+		aboutButton = new JButton(about);
+		aboutButton.setBounds(width-140, height-100, 80, 40);
+		aboutButton.setActionCommand("about");
+		aboutButton.addActionListener(this);
 		
 		add(pbLabel);
 		add(nameTextArea);
 		add(playButton);
 		add(rulesButton);
+		add(aboutButton);
 	}
 
 	//Get player name
@@ -173,8 +151,10 @@ public class MenuPanel extends JPanel implements ActionListener, KeyListener, Fo
 		else if(event.equals("rules")) {
 			JOptionPane.showMessageDialog(null, "Use your mousepad/mouse to pilot your worm around the map to eat food and grow. \n"
 					+ "Kill other worms by making their head collide into worm body/game borders. \n"
-					+ "The objective is to be the largest worm in length. ", "How To Play", JOptionPane.PLAIN_MESSAGE);
-
+					+ "The objective is to be the largest worm in length. ", "How To Play", JOptionPane.QUESTION_MESSAGE);
+		}
+		else if(event.equals("about")) {
+			JOptionPane.showMessageDialog(null, "Creators: Karen & Rhea \nIdea from: Slither.io\n\n Have fun!", "About Worm.io", JOptionPane.QUESTION_MESSAGE);
 		}
 	}
 

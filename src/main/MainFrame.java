@@ -1,25 +1,17 @@
 package main;
 import java.awt.CardLayout;
-import java.awt.Dimension;
-import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.image.BufferedImage;
+
 
 import javax.swing.*;
 
 public class MainFrame extends JFrame{
 	
-	
+
 	static JPanel mainPanel;
 	MenuPanel menuPanel;
 	GamePanel gamePanel;
 	CardLayout cardLayout;
 
-	
-	//ImageIcon play = new ImageIcon("play.jpg");
-	//ImageIcon rules = new ImageIcon("rules.jpg");
 	
 	
 	public MainFrame() {
@@ -56,9 +48,10 @@ public class MainFrame extends JFrame{
 	
 	//switch back to menu panel
 	public void gameOff() {
-		System.out.println(gamePanel.pB);
 		menuPanel.updatePB(gamePanel.pB);
 	    cardLayout.show(mainPanel, "menu");
+		menuPanel.repaint();
+
 	}
 
 

@@ -29,7 +29,6 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
 	static final int FPS = 60;
 
 	private static final Camera cam = new Camera(0, 0);
-	private final Object modelLock = new Object();
 	private Thread gameThread;
     private Leaderboard lb = new Leaderboard(this);
     
@@ -73,7 +72,6 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
             public void actionPerformed(ActionEvent e) {
             	stopGame();
     			mainFrame.gameOff();
-    			reset();
         	}
         };
         ActionMap actionMap = this.getActionMap();
@@ -81,6 +79,7 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
 	}
 
 	public void startGame() {
+		reset();
 		player = new Player(new Point(randomPoint()), mainFrame.getPlayerName(), true); //create player
 		snakes.put(0, player); //player always map index 0
 		cam.set(player);
@@ -95,9 +94,6 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
 		runGame = false;
 		pB = playerInfo[0];
 		this.gameThread = null;
-		if(lose) {
-			repaint();
-		}
 	}
 	
 	private void reset() {
@@ -113,16 +109,18 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
 	@Override
 	public void run() {
 		// game loop
-		while(runGame) {
+		
 			double drawInterval = 1000000000 / FPS;
 			double nextDrawTime = System.nanoTime() + drawInterval;
-			while (true) {
-	
+			
+			while(runGame) {
+				System.out.println("yes");
+
 				update();
 				checkCollision();
-				if(!lose) {
-					repaint();
-					
+				if(runGame)
+					draw();
+				if(!lose) {		
 					try {
 						double sleepTime = nextDrawTime - System.nanoTime();
 						if (sleepTime < 0)
@@ -137,7 +135,7 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
 					break;
 				
 			}
-		}
+		
 		
 		
 	}
@@ -146,19 +144,16 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
 
 		player.move();
 		cam.set(player);
-
-		synchronized (modelLock) {
-			if (foods.size() < 2000) {
-				Food newFood = new Food(randomPoint());
-				while (!foods.add(newFood))
-					;
-			}
+		if (foods.size() < 2000) {
+			Food newFood = new Food(randomPoint());
+			while (!foods.add(newFood))
+				;
 		}
 		lb.update();
 	}
-
-	@Override
-	public void paint(Graphics g4) {
+	
+	public void draw() {
+		Graphics g4 = this.getGraphics();
 		Graphics graphics = backBuffer.getGraphics();
 		Graphics g2 = backBuffer.getGraphics();
 		Graphics2D g3 = (Graphics2D) backBuffer.getGraphics();
@@ -172,15 +167,11 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
 		tileM.draw(g);
 		player.draw(g);
 
-
-		synchronized (modelLock) {
-			Iterator<Food> it = foods.iterator();
-			while (it.hasNext()) {
-				Food f = it.next();
-				f.draw(g);
-			}
+		Iterator<Food> it = foods.iterator();
+		while (it.hasNext()) {
+			Food f = it.next();
+			f.draw(g);
 		}
-		
 		cam.turnOff(g);
 
 		if(lose) {
@@ -197,16 +188,6 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
 
 
 	
-//	private void addNewPB() {
-//		try {
-//			PrintWriter outFile = new PrintWriter(new FileWriter("pb.txt", true));
-//			outFile.append("\nplayerInfo[0]");
-//		} catch (IOException e) {
-//			System.out.println("File error");
-//		}
-//		
-//	}
-	
 	private void checkCollision() {
 		Point h = player.getHead();
 		if (h.x < topLeft.x || h.x + UNIT_SIZE > bottomRight.x
@@ -216,18 +197,15 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
 			
 		}
 		if(!lose) {
-			synchronized (modelLock) {
-				Iterator<Food> it = foods.iterator();
-				while (it.hasNext()) {
-					Food f = it.next();
-					if (f.checkCollide(h)) {
-						player.Grew();
-						Point newPoint = randomPoint();
-						f.x = newPoint.x;
-						f.y = newPoint.y;
-					}
+			Iterator<Food> it = foods.iterator();
+			while (it.hasNext()) {
+				Food f = it.next();
+				if (f.checkCollide(h)) {
+					player.Grew();
+					Point newPoint = randomPoint();
+					f.x = newPoint.x;
+					f.y = newPoint.y;
 				}
-				
 			}
 		}
 

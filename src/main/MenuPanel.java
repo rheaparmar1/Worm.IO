@@ -145,7 +145,7 @@ public class MenuPanel extends JPanel implements ActionListener, KeyListener, Fo
 	
 	private boolean checkName() {
 		boolean isValid = false;
-		if(nameTextArea.getText().equals("enter name...")) 
+		if(nameTextArea.getText().equals("enter name...") || nameTextArea.getText().equals("")) 
 			JOptionPane.showMessageDialog(null, "Enter name to play. Try again.", "Enter Name", JOptionPane.WARNING_MESSAGE);
 		else if(nameTextArea.getText().length() >= 12)
 			JOptionPane.showMessageDialog(null, "Entered name is too long. Try again.", "Name too long", JOptionPane.WARNING_MESSAGE);
@@ -172,9 +172,9 @@ public class MenuPanel extends JPanel implements ActionListener, KeyListener, Fo
 				frame.gameOn();
 		}
 		else if(event.equals("rules")) {
-			JOptionPane.showMessageDialog(null, "Use your mousepad/mouse to pilot your snake around the map to eat food and grow. \n"
-					+ "Kill other snakes by making their head collide into snake body/game borders. \n"
-					+ "The objective is to be the largest snake in length. ", "How To Play", JOptionPane.PLAIN_MESSAGE);
+			JOptionPane.showMessageDialog(null, "Use your mousepad/mouse to pilot your worm around the map to eat food and grow. \n"
+					+ "Kill other worms by making their head collide into worm body/game borders. \n"
+					+ "The objective is to be the largest worm in length. ", "How To Play", JOptionPane.PLAIN_MESSAGE);
 
 		}
 	}

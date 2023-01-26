@@ -35,42 +35,35 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 public class MenuPanel extends JPanel implements ActionListener, KeyListener, FocusListener {
-	CardLayout cardLayout;
+	//Variables
+	private MainFrame frame;
+	private CardLayout cardLayout;
 
-	//static JFrame frame;
-	static JPanel myPanel;
-	JButton playButton, rulesButton;
-	JTextField nameTextArea;
-	String playerName;
-	JPanel centrePanel = new JPanel();
-	JLabel pbLabel;
-	int pb;
-	ImageIcon play = new ImageIcon("buttons/play.png");
-	ImageIcon rules = new ImageIcon("buttons/rules.png");
-	//final Dimension screen = new Dimension(Toolkit.getDefaultToolkit().getScreenSize());
-	static int width = 1400;
-	static int height = 700;
-
-	long currentTime;
-	static BufferedImage mainMenu;
-	MainFrame frame;
+	private JButton playButton, rulesButton;
+	private JTextField nameTextArea;
+	private JLabel pbLabel;
+	private int pb;
+	private ImageIcon play = new ImageIcon("buttons/play.png");
+	private ImageIcon rules = new ImageIcon("buttons/rules.png");
+	private static int width = 1400;
+	private static int height = 700;
+	private static BufferedImage mainMenu;
 	
-
+	//Constructor
 	public MenuPanel(MainFrame frame) {
 		this.frame = frame;
-		System.out.println(width + "" + height);
 		cardLayout = new CardLayout();
 
 		setPreferredSize(new Dimension(width, height));
 		setLayout(null);
 		
-		try { // Load images
+		try { // Load image
 			mainMenu = ImageIO.read(new File("screens/main.png"));		
 		} catch (IOException e) {
 			System.out.println("File cannot be found"); 
 		}
+		
 		pb = updatePB(pb);
-		System.out.println(pb);
 		pbLabel = new JLabel("Your personal best is " + pb + "!");
 		pbLabel.setBounds((width-250)/2, 270, 300, 80);
 		pbLabel.setFont(new Font("Helvetica",Font.BOLD,22));
@@ -83,7 +76,6 @@ public class MenuPanel extends JPanel implements ActionListener, KeyListener, Fo
 		nameTextArea.addFocusListener(this);
 		nameTextArea.addKeyListener(this);
 		
-		//Make JButton
 		playButton = new JButton(play);
 		playButton.setFont(new Font("Helvetica",Font.BOLD,17));
 		playButton.setBounds((width-200)/2, 410, 200, 60);
@@ -100,18 +92,22 @@ public class MenuPanel extends JPanel implements ActionListener, KeyListener, Fo
 		add(nameTextArea);
 		add(playButton);
 		add(rulesButton);
-		
-		
-		//Make panels
-
 	}
 
+	//Get player name
+	public String getPlayerName() {
+		return nameTextArea.getText();
+	}
+	
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		g.drawImage(mainMenu, 0, 0, null);
 		
 	}
 
+	//Description: The method gets greatest personal best from text file
+	//Parameteres: int new personal best
+	//Return: int of highest pb
 	public int updatePB(int pb) {
 		BufferedReader inFile;
 		int currentPB=-1;
@@ -126,7 +122,7 @@ public class MenuPanel extends JPanel implements ActionListener, KeyListener, Fo
 			System.out.print(e);
 		}
 		
-		if (pb>currentPB) {
+		if (pb>currentPB) { //add new pb 
 			try {
 				PrintWriter outFile = new PrintWriter(new FileWriter("pb.txt", true));
 				outFile.println(pb);
@@ -143,6 +139,9 @@ public class MenuPanel extends JPanel implements ActionListener, KeyListener, Fo
 			return currentPB;
 	}
 	
+	//Description: The method checks if user entry name is valid
+	//Parameteres: n/a
+	//Return: boolean isValidEntry
 	private boolean checkName() {
 		boolean isValid = false;
 		if(nameTextArea.getText().equals("enter name...") || nameTextArea.getText().equals("")) 
@@ -178,9 +177,7 @@ public class MenuPanel extends JPanel implements ActionListener, KeyListener, Fo
 
 		}
 	}
-	public String getPlayerName() {
-		return nameTextArea.getText();
-	}
+
 	
 	public void focusGained(FocusEvent e) {
 		nameTextArea.setText("");

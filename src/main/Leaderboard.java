@@ -10,19 +10,17 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
-
-
 public class Leaderboard{
-	GamePanel gp;
-
+	//Instance variables
+	private GamePanel gp;
 	private int x;
   	private int y;
-	int[] table = new int[10];
-	int tableY = 0;
-	Color color = new Color(50, 50, 50, 128);
-	List<Snake> snakesCopy;
-	int currentRank;
+	private int[] table = new int[10];
+	private int tableY = 0;
+	private List<Snake> snakesCopy;
+	private int rank;
 	
+	//Constructor
 	public Leaderboard(GamePanel gp) {
 		this.gp = gp;
 		for(int i = 0; i < 10; i++) {
@@ -31,30 +29,34 @@ public class Leaderboard{
 		}
 	}
 	
+	//Description: The method orders snakes from largest to smallest
+	//Parameteres: n/a
 	public void update(){
 		snakesCopy = new ArrayList<Snake>(GamePanel.snakes.values());
 		if(snakesCopy.size()>1)
 			Collections.sort(snakesCopy, new leaderComparator());
-	    currentRank = Collections.binarySearch(snakesCopy, new Snake(new Point(0,0), "", true), new playerComparator());
+	    rank = Collections.binarySearch(snakesCopy, new Snake(new Point(0,0), "", true), new playerComparator());
 	}
 	
+	//Description: The method draws leaderboard onto view screen directly
+	//Parameteres: Graphics
 	public void draw(Graphics g) {
 		for (int i = 0; i < 10; i++) {
-	        g.setColor(color);
+	        g.setColor(new Color(50, 50, 50, 128));
 		    g.drawRect(0, y + table[i], 125, 30);
 		    g.fillRect(0, y + table[i], 125, 30);
 		    g.setColor(Color.WHITE);
 	        if(GamePanel.snakes.size()>i)
 	            g.drawString("#" + (i + 1) + ": " + snakesCopy.get(i).name + " : " + (int) snakesCopy.get(i).bodyParts, x, y + table[i] + 25);
-	    }
-	    
-	    
+	    }    
 	}
 	
+	//Description: The method gets player rank and length
+	//Parameteres: Graphics
 	public int[] playerInfo(Graphics g) {
 		int[] playerInfo = new int[2];
-		playerInfo[0] = snakesCopy.get(currentRank).bodyParts;
-		playerInfo[1] = currentRank + 1;
+		playerInfo[0] = snakesCopy.get(rank).bodyParts;
+		playerInfo[1] = rank + 1;
 		g.setColor(new Color(50, 50, 50, 128));
         g.drawRect(0, GamePanel.VIEW_HEIGHT-125, 125, 50);
         g.fillRect(0, GamePanel.VIEW_HEIGHT-125, 125, 50);
@@ -66,7 +68,7 @@ public class Leaderboard{
         return playerInfo;
 	}
 
-	
+	//Description: This is a comparator class to compare snake body lengths 
 	private class leaderComparator implements Comparator<Snake> {
 		public int compare(Snake s1, Snake s2) {
 			if(s1.bodyParts == s2.bodyParts)
@@ -78,6 +80,7 @@ public class Leaderboard{
 		}
 	}
 	
+	//Description: This is a comparator class to compare whether snake is a player
 	private class playerComparator implements Comparator<Snake> {
 		public int compare(Snake s1, Snake s2) {
 			return (-1 * Boolean.compare(s1.isPlayer, s2.isPlayer));

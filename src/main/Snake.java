@@ -73,10 +73,12 @@ public class Snake{
 	}
 
 	private void init(Point head) {
-		for (int i = 0; i < bodyParts; i++) {
+		
+		setHead(head);
+
+		for(int i = 0; i < bodyParts; i++) {
 			body.add(new Point(headX + u * i, headY));
 		}
-		setHead(head);
 	}
 	
 	public void setHead(Point head) {
@@ -87,23 +89,23 @@ public class Snake{
 	}
 
 	private Point calcNewPoint(Point head) {
-		//	System.out.println(headX + "," + headY + "->" + mouse.x + "," + mouse.y);
-			double degree = 0;
+			System.out.println(headX + "," + headY + "->" + mouse.x + "," + mouse.y);
+		double degree = 0;
 
-			if (headX < goalX && headY < goalY) {
-				degree = 360 - Math.toDegrees(Math.atan((double) (goalY - headY) / (goalX - headX)));
-			} else if (headX > goalX && headY > goalY) {
-				degree = 180 - Math.toDegrees(Math.atan((double) (headY - goalY) / (headX - goalX)));
-			} else if (headY > goalY && headX < goalX) {
-				degree = Math.toDegrees(Math.atan((double) (headY - goalY) / (goalX - headX)));
-			} else if (headY < goalY && headX > goalX) {
-				degree = 180 + Math.toDegrees(Math.atan((double) (goalY - headY) / (headX - goalX)));
-			}
-			
-			Point p = new Point((int) (headX + Math.cos(Math.toRadians(degree)) * speed),
-					(int) (headY - Math.sin(Math.toRadians(degree)) * speed));
-			return p;
+		if (headX < goalX && headY < goalY) {
+			degree = 360 - Math.toDegrees(Math.atan((double) (goalY - headY) / (goalX - headX)));
+		} else if (headX > goalX && headY > goalY) {
+			degree = 180 - Math.toDegrees(Math.atan((double) (headY - goalY) / (headX - goalX)));
+		} else if (headY > goalY && headX < goalX) {
+			degree = Math.toDegrees(Math.atan((double) (headY - goalY) / (goalX - headX)));
+		} else if (headY < goalY && headX > goalX) {
+			degree = 180 + Math.toDegrees(Math.atan((double) (goalY - headY) / (headX - goalX)));
 		}
+		
+		Point p = new Point((int) (headX + Math.cos(Math.toRadians(degree)) * speed),
+				(int) (headY - Math.sin(Math.toRadians(degree)) * speed));
+		return p;
+	}
 
 
 }

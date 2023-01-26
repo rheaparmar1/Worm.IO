@@ -11,8 +11,6 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 
 public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
-	MainFrame mainFrame;
-
 	static final int VIEW_WIDTH = 1400;
 	static final int VIEW_HEIGHT = 700;
 	static final int MAP_WIDTH = 7000;
@@ -27,123 +25,107 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
 	static final int UNIT_SIZE = 10;
 	static final int FRUIT_COUNT = 100;
 	static final int FPS = 60;
+	public int pB;
 
+	public Player player;
+	public MiniMap miniMap = new MiniMap(this);
+    public BackgroundTiles tiles = new BackgroundTiles(this);
+	public static Map<Integer, Snake> snakes = new HashMap<Integer, Snake>();
+	public static HashSet<Food> foods = new HashSet<Food>();
+	
+	private MainFrame mainFrame;
 	private static final Camera cam = new Camera(0, 0);
 	private Thread gameThread;
     private Leaderboard lb = new Leaderboard(this);
     
-	public Player player;
-	public MiniMap miniMap = new MiniMap(this);
-    public TileManager tileM = new TileManager(this);
-
-	
 	private BufferedImage backBuffer;
 	private BufferedImage loseScreen;
 	
-	static Map<Integer, Snake> snakes = new HashMap<Integer, Snake>();
-	static HashSet<Food> foods = new HashSet<Food>();
-
 	private int[] playerInfo = new int[2];
 	private boolean runGame = false;
 	private boolean lose = false;
-	int pB;
 
-	
+	//Constructor
 	public GamePanel(MainFrame mainFrame) {
 		this.mainFrame = mainFrame;
-		this.backBuffer = new BufferedImage(VIEW_WIDTH, VIEW_HEIGHT, BufferedImage.TYPE_INT_RGB);
+		this.backBuffer = new BufferedImage(VIEW_WIDTH, VIEW_HEIGHT, BufferedImage.TYPE_INT_RGB); //gameboard
 		
 		try { //load game over image
 			loseScreen = ImageIO.read(new File("screens/losescreen.png"));		
 		} catch (IOException e) {
 			System.out.println("File cannot be found"); 
 		}
-				
-		
+						
 		setPreferredSize(new Dimension(VIEW_WIDTH, VIEW_HEIGHT));
 		this.setBackground(Color.black);
 		this.setFocusable(true);
 		setBackground(Color.BLACK);
 		addMouseMotionListener(this);
-
-        InputMap inputMap = this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
-        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "escapeAction");
-        Action escapeAction = new AbstractAction() {
-            public void actionPerformed(ActionEvent e) {
-            	stopGame();
-    			mainFrame.gameOff();
-        	}
-        };
-        ActionMap actionMap = this.getActionMap();
-        actionMap.put("escapeAction", escapeAction);
+		bindEscKey();
 	}
-
+	
+	//Description: The method starts game thread
+	//Parameters: n/a
 	public void startGame() {
-		reset();
-		player = new Player(new Point(randomPoint()), mainFrame.getPlayerName(), true); //create player
-		snakes.put(0, player); //player always map index 0
-		cam.set(player);
-		
+		init();
 		this.gameThread = new Thread(this);
 		this.gameThread.start();
 		runGame = true;
 
 	}
 	
-	public void stopGame() {
-		runGame = false;
-		pB = playerInfo[0];
-		this.gameThread = null;
+	//Description: The method contains gamethread
+	//Parameters: n/a
+	@Override
+	public void run() {
+		//game loop
+		double drawInterval = 1000000000 / FPS;
+		double nextDrawTime = System.nanoTime() + drawInterval;
+		
+		while(runGame) {
+			update();
+			checkCollision();
+			draw();
+			if(!lose) {		
+				try { //calculate time passed 
+					double sleepTime = nextDrawTime - System.nanoTime();
+					if (sleepTime < 0)
+						sleepTime = 0;
+					Thread.sleep((long) sleepTime / 1000000); //sleep thread for time left
+					nextDrawTime += drawInterval;
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+			else
+				break;
+		}
+	
 	}
 	
-	private void reset() {
-		lose = false;
-		Iterator it = snakes.entrySet().iterator();
-		while (it.hasNext()) {
-		    Entry item = (Entry) it.next();
-		    it.remove();
-		}
-		foods.removeAll(foods);
+	@Override
+	public void mouseMoved(MouseEvent e) {
+		if(!lose)
+			player.setGoal((int) (e.getX() + cam.x), (int) (e.getY() + cam.y));
 	}
 
 	@Override
-	public void run() {
-		// game loop
-		
-			double drawInterval = 1000000000 / FPS;
-			double nextDrawTime = System.nanoTime() + drawInterval;
-			
-			while(runGame) {
-				System.out.println("yes");
-
-				update();
-				checkCollision();
-				if(runGame)
-					draw();
-				if(!lose) {		
-					try {
-						double sleepTime = nextDrawTime - System.nanoTime();
-						if (sleepTime < 0)
-							sleepTime = 0;
-						Thread.sleep((long) sleepTime / 1000000);
-						nextDrawTime += drawInterval;
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-				}
-				else
-					break;
-				
-			}
-		
-		
-		
+	public void mouseDragged(MouseEvent e) {
 	}
-
+	
+	//Description: The method stops game thread
+	//Parameters:
+	private void stopGame() {
+		runGame = false;
+		pB = playerInfo[0]; //set current length (personal best)
+		this.gameThread = null;
+	}
+	
+	//Description: The method updates game status (player location, focus camera on player, generate food, leaderboard)
+	//Parameters: n/a
 	private void update() {
-
-		player.move();
-		cam.set(player);
+		player.move(); 
+		cam.focus(player); //move view screen to centre on player
 		if (foods.size() < 2000) {
 			Food newFood = new Food(randomPoint());
 			while (!foods.add(newFood))
@@ -151,52 +133,66 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
 		}
 		lb.update();
 	}
-	
-	public void draw() {
-		Graphics g4 = this.getGraphics();
-		Graphics graphics = backBuffer.getGraphics();
-		Graphics g2 = backBuffer.getGraphics();
-		Graphics2D g3 = (Graphics2D) backBuffer.getGraphics();
-		Graphics2D g = (Graphics2D) graphics;
-	
-		
-		g.setColor(Color.BLACK);
-		g.fillRect(0, 0, VIEW_WIDTH, VIEW_HEIGHT);	
-		
-		cam.turnOn(g);
-		tileM.draw(g);
-		player.draw(g);
 
+	//Description: The method draws game components
+	//Parameters: n/a
+	private void draw() {
+		Graphics g = this.getGraphics(); //panel graphics
+		Graphics2D gB = (Graphics2D) backBuffer.getGraphics(); //gameboard graphics
+		Graphics2D gV = (Graphics2D) backBuffer.getGraphics(); //view screen graphics
+	
+		gB.setColor(Color.BLACK);
+		gB.fillRect(0, 0, VIEW_WIDTH, VIEW_HEIGHT);	
+		
+		cam.turnOn(gB);
+		tiles.draw(gB);
+		player.draw(gB);
 		Iterator<Food> it = foods.iterator();
 		while (it.hasNext()) {
 			Food f = it.next();
-			f.draw(g);
+			f.draw(gB);
 		}
-		cam.turnOff(g);
+		cam.turnOff(gB);
 
-		if(lose) {
-			drawLoseScreen(g2);
-		}
+		if(lose) 
+			drawLoseScreen(gV);
 		else {
-			miniMap.drawMiniMap(g3);
-			lb.draw(g2);
-			playerInfo = lb.playerInfo(g2);
+			miniMap.drawMiniMap(gV);
+			lb.draw(gV);
+			playerInfo = lb.playerInfo(gV);
 		}
 
-		g4.drawImage(backBuffer, 0, 0, this);
+		g.drawImage(backBuffer, 0, 0, this);
+		
 	}
 
-
+	//Description: The method initialise game variables
+	//Parameters: n/a
+	private void init() {
+		lose = false;
+		Iterator<Entry<Integer, Snake>> it = snakes.entrySet().iterator();
+		while (it.hasNext()) {
+		    it.next();
+		    it.remove();
+		}
+		foods.removeAll(foods);
 	
+		player = new Player(new Point(randomPoint()), mainFrame.getPlayerName()); //create player
+		snakes.put(0, player); //player always at map index 0
+		cam.focus(player);
+	}
+	
+	//Description: The method checks collision of snake head 
+	//Parameters: n/a
 	private void checkCollision() {
 		Point h = player.getHead();
-		if (h.x < topLeft.x || h.x + UNIT_SIZE > bottomRight.x
-				|| h.y < topLeft.y || h.y + UNIT_SIZE > bottomRight.y) {
+		if (h.x < topLeft.x || h.x + UNIT_SIZE > bottomRight.x || h.y < topLeft.y || h.y + UNIT_SIZE > bottomRight.y) { //snake head and border
 			lose = true;
 			stopGame();
 			
 		}
-		if(!lose) {
+		
+		if(!lose) { //snake head with food
 			Iterator<Food> it = foods.iterator();
 			while (it.hasNext()) {
 				Food f = it.next();
@@ -211,6 +207,9 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
 
 	}
 	
+	//Description: The method generate random point on board
+	//Parameters: n/a
+	//Return: Point
 	private Point randomPoint() {
 		Point p = new Point(0, 0);
 		p.x = (int) (Math.random() * (MAP_WIDTH - VIEW_WIDTH - UNIT_SIZE) + BORDER_WIDTH);
@@ -218,6 +217,9 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
 		return p;
 	}
 	
+	//Description: The method draws random point on board
+	//Parameters: n/a
+	//Return: Point
 	private void drawLoseScreen(Graphics g) {
 		g.setColor(new Color(50, 50, 50, 128));
 		g.drawRect(VIEW_WIDTH/3, VIEW_HEIGHT/4, VIEW_WIDTH/3, VIEW_HEIGHT/2);
@@ -230,14 +232,24 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
 
 	    
 	}
-	
-	@Override
-	public void mouseMoved(MouseEvent e) {
-		if(!lose)
-			player.setGoal((int) (e.getX() + cam.x), (int) (e.getY() + cam.y));
+	private void bindEscKey() {
+        InputMap inputMap = this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "escapeAction");
+        Action escapeAction = new AbstractAction() {
+			private static final long serialVersionUID = 1L; //suppress a serializable warning
+
+			public void actionPerformed(ActionEvent e) {
+            	stopGame();
+            	try {
+					Thread.sleep(200); //get main Thread to finish before exiting to menu
+				} catch (InterruptedException e1) {
+					e1.printStackTrace();
+				}
+            	mainFrame.gameOff();
+        	}
+        };
+        ActionMap actionMap = this.getActionMap();
+        actionMap.put("escapeAction", escapeAction);
 	}
 
-	@Override
-	public void mouseDragged(MouseEvent e) {
-	}
 }

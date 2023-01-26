@@ -12,7 +12,7 @@ public class Snake{
 	public String name;
 
 	boolean isPlayer;
-	public int length = 20;
+	public int length = 12;
 	int circles = 60;
 	private int speed = 10;
 	private Point lastTail;
@@ -55,7 +55,6 @@ public class Snake{
 			
 		}
 		lastTail = body.get(length - 1);
-		lastTail = new Point(lastTail.x, lastTail.y);
 		for (int i = length-1; i > 0; i--)
 			body.set(i, body.get(i - 1));
 
@@ -67,8 +66,11 @@ public class Snake{
 	public void draw(Graphics g) {
 		g.setColor(color);
 		g.fillOval(headX, headY, u+2, u+2);
-		for (Point p : body)
+		for (Point p : body) {
+			if(p == null)
+				continue;
 			g.fillOval(p.x, p.y, u, u);
+		}
 
 	}
 	
@@ -93,7 +95,7 @@ public class Snake{
 						continue;
 					distance = (int) Math.sqrt((point.x-headX)*(point.x-headX)+(point.y-headY)*(point.y-headY));
 					if(distance < u) {
-						
+						//key is the snake that died
 						return true;
 					}
 				}

@@ -267,16 +267,14 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
 			Map.Entry<Integer, Snake> pair = it.next();
 		    Snake s = pair.getValue();
 		    int key = pair.getKey();
-		    System.out.println(snakes.size()+"!!!");
 		    if(s.checkBodyCollide(key, snakes)) {
+		    	//s is the player that dies!!!!
 		    	if(s.isPlayer) {
 		    		lose = true;
 		    		stopGame();
 		    	}
 		    	else {
-		    		
-		    		System.out.println(key + " is dead");;
-		    		it.remove();
+		    	 	it.remove();
 		    	}
 			}
 		}	

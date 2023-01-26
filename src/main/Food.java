@@ -11,6 +11,7 @@ public class Food {
 		this.x = p.x;
 		this.y = p.y;
 	}
+	
 
 	public boolean checkCollide(Point head) {
 		int x = head.x;

@@ -26,6 +26,7 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
 	static final int FRUIT_COUNT = 100;
 	static final int FPS = 60;
 	public int pB;
+	public int botCounter = 1;
 
 	public Player player;
 	public MiniMap miniMap = new MiniMap(this);
@@ -126,12 +127,19 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
 	private void update() {
 		player.move(); 
 		cam.focus(player); //move view screen to centre on player
+		
+		if(snakes.size() < 3) {//3 for now
+			snakes.put(botCounter, new SnakeBot(randomPoint(), botCounter));
+			botCounter++;
+		}
+		
 		if (foods.size() < 2000) {
 			Food newFood = new Food(randomPoint());
 			while (!foods.add(newFood))
 				;
 		}
 		lb.update();
+
 	}
 
 	//Description: The method draws game components
@@ -146,7 +154,11 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
 		
 		cam.turnOn(gB);
 		tiles.draw(gB);
-		player.draw(gB);
+		for(Entry<Integer, Snake> entry: GamePanel.snakes.entrySet()) {
+			Snake s = entry.getValue();
+			s.draw(gB);
+
+		}
 		Iterator<Food> it = foods.iterator();
 		while (it.hasNext()) {
 			Food f = it.next();

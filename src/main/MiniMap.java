@@ -2,6 +2,7 @@ package main;
 
 import java.awt.*;
 import java.awt.image.*;
+import java.util.Map.Entry;
 
 public class MiniMap extends BackgroundTiles{
 	//Instance variables
@@ -26,7 +27,16 @@ public class MiniMap extends BackgroundTiles{
 		Graphics2D g1 = (Graphics2D) graphics;
 		
 		gp.tiles.draw(g1);
-		gp.player.drawHead(g1);
+		for(Entry<Integer, Snake> entry: GamePanel.snakes.entrySet()) {
+			Snake s = entry.getValue();
+			if(entry.getKey() == 0) {
+				s.drawHead(g1);
+			}
+			else {
+				SnakeBot sB = (SnakeBot) s;
+				sB.drawHead(g1);
+			}
+		}
 		
 		BufferedImage resized = new BufferedImage(width, height, original.getType()); //resize full gameboard image
 		Graphics2D gR = resized.createGraphics(); 

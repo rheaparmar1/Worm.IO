@@ -14,13 +14,14 @@ public class Snake{
 	boolean isPlayer;
 	public int length = 12;
 	int circles = 60;
-	private int speed = 10;
+	public int speed = 10;
 	private Point lastTail;
 
 	private int goalX;
 	private int goalY;
 	private Color color;
-	
+	Timer boost = new Timer();
+
 	
 	public Snake(Point head, String name, boolean isPlayer) {
 		init(head);
@@ -49,8 +50,14 @@ public class Snake{
 
 	public void move() {
 		double distance = Math.hypot(headX-goalX, headY-goalY);
-		
+
 		if (distance < u) {
+			Point p =MouseInfo.getPointerInfo().getLocation();
+			goalX=p.x + (int)GamePanel.cam.x;
+		
+			goalY=p.y+ (int)GamePanel.cam.y;
+			System.out.println(distance);
+
 			return;
 			
 		}
@@ -66,12 +73,19 @@ public class Snake{
 	public void draw(Graphics g) {
 		g.setColor(color);
 		g.fillOval(headX, headY, u+2, u+2);
+
 		for (Point p : body) {
 			if(p == null)
 				continue;
 			g.fillOval(p.x, p.y, u, u);
 		}
-
+		g.setColor(Color.BLACK);
+		g.fillOval(headX-1, headY-1, 6, 6);
+		g.fillOval(headX+7, headY+7, 6, 6);
+		g.setColor(Color.white);
+		g.fillOval(headX, headY, 3, 3);
+		g.fillOval(headX+8, headY+8, 3, 3);
+		
 	}
 	
 

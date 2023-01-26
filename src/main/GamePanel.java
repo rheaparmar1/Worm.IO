@@ -10,7 +10,7 @@ import java.util.Map.Entry;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 
-public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
+public class GamePanel extends JPanel implements Runnable, MouseMotionListener, MouseListener {
 	static final int VIEW_WIDTH = 1400;
 	static final int VIEW_HEIGHT = 700;
 	static final int MAP_WIDTH = 7000;
@@ -38,7 +38,7 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
 	public static HashSet<Food> foods = new HashSet<Food>();
 	
 	private MainFrame mainFrame;
-	private static final Camera cam = new Camera(0, 0);
+	public static final Camera cam = new Camera(0, 0);
 	private Thread gameThread;
     private Leaderboard lb = new Leaderboard(this);
     
@@ -65,6 +65,7 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
 		this.setFocusable(true);
 		setBackground(Color.BLACK);
 		addMouseMotionListener(this);
+		addMouseListener(this);
 		bindEscKey();
 	}
 	
@@ -324,6 +325,37 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
         };
         ActionMap actionMap = this.getActionMap();
         actionMap.put("escapeAction", escapeAction);
+	}
+
+	@Override
+	public void mouseClicked(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mousePressed(MouseEvent e) {
+		System.out.print("drag");
+		player.speed=20;
+		//player.boost.
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent e) {
+		System.out.print("release");
+		player.speed=10;		
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseExited(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

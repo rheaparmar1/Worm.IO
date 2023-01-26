@@ -89,7 +89,7 @@ public class Snake{
 	}
 
 	private Point calcNewPoint(Point head) {
-			System.out.println(headX + "," + headY + "->" + mouse.x + "," + mouse.y);
+		//	System.out.println(headX + "," + headY + "->" + mouse.x + "," + mouse.y);
 		double degree = 0;
 
 		if (headX < goalX && headY < goalY) {

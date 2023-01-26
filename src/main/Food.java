@@ -2,9 +2,8 @@ package main;
 
 import java.awt.*;
 
-public class Food {
+public class Food extends Point {
 
-	int x, y;
 	static final int size = GamePanel.UNIT_SIZE;
 
 	public Food(Point p) {

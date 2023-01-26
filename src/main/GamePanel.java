@@ -107,7 +107,7 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
 	@Override
 	public void mouseMoved(MouseEvent e) {
 		if(!lose)
-			player.setGoal((int) (e.getX() + cam.x), (int) (e.getY() + cam.y));
+			player.setTarget((int) (e.getX() + cam.x), (int) (e.getY() + cam.y));
 	}
 
 	@Override
@@ -128,9 +128,21 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
 		player.move(); 
 		cam.focus(player); //move view screen to centre on player
 		
-		if(snakes.size() < 3) {//3 for now
+	
+		if(snakes.size() < 100) {//3 for now
 			snakes.put(botCounter, new SnakeBot(randomPoint(), botCounter));
 			botCounter++;
+		}
+	
+		for(Entry<Integer, Snake> entry: GamePanel.snakes.entrySet()) {
+			if(entry.getKey() != 0) {
+				SnakeBot sB = (SnakeBot) entry.getValue();
+				TargetPoint tP = sB.findNearestFood(foods);
+				sB.setTarget(tP.x, tP.y);
+				sB.move();
+			}
+			
+
 		}
 		
 		if (foods.size() < 2000) {
@@ -182,6 +194,7 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
 	//Parameters: n/a
 	private void init() {
 		lose = false;
+		botCounter = 1;
 		Iterator<Entry<Integer, Snake>> it = snakes.entrySet().iterator();
 		while (it.hasNext()) {
 		    it.next();
@@ -217,6 +230,24 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener {
 			}
 		}
 
+		for(Entry<Integer, Snake> entry: GamePanel.snakes.entrySet()) {
+			if(entry.getKey() != 0) {
+				SnakeBot sB = (SnakeBot) entry.getValue();
+				Point botH = sB.getHead();
+				Iterator<Food> it = foods.iterator();
+				while (it.hasNext()) {
+					Food f = it.next();
+					if (f.checkCollide(botH)) {
+						sB.Grew();
+						Point newPoint = randomPoint();
+						f.x = newPoint.x;
+						f.y = newPoint.y;
+					}
+				}
+			}
+			
+
+		}
 	}
 	
 	//Description: The method generate random point on board

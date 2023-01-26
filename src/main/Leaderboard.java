@@ -19,7 +19,7 @@ public class Leaderboard{
 	private int tableY = 0;
 	private List<Snake> snakesCopy;
 	private int rank;
-	
+	private int[] playerInfo = new int[2];
 	//Constructor
 	public Leaderboard(GamePanel gp) {
 		this.gp = gp;
@@ -35,7 +35,14 @@ public class Leaderboard{
 		snakesCopy = new ArrayList<Snake>(GamePanel.snakes.values());
 		if(snakesCopy.size()>1)
 			Collections.sort(snakesCopy, new leaderComparator());
-	    rank = Collections.binarySearch(snakesCopy, new Snake(new Point(0,0), "", true), new playerComparator());
+		for(int i = 0; i < snakesCopy.size(); i++) {
+			if(snakesCopy.get(i).isPlayer) {
+				rank = i;
+			}
+		}
+	    playerInfo[0] = snakesCopy.get(rank).length;
+		playerInfo[1] = rank + 1;
+
 	}
 	
 	//Description: The method draws leaderboard onto view screen directly
@@ -47,16 +54,13 @@ public class Leaderboard{
 		    g.fillRect(0, y + table[i], 125, 30);
 		    g.setColor(Color.WHITE);
 	        if(GamePanel.snakes.size()>i)
-	            g.drawString("#" + (i + 1) + ": " + snakesCopy.get(i).name + " : " + (int) snakesCopy.get(i).bodyParts, x, y + table[i] + 25);
+	            g.drawString("#" + (i + 1) + ": " + snakesCopy.get(i).name + " : " + (int) snakesCopy.get(i).length, x, y + table[i] + 25);
 	    }    
 	}
 	
 	//Description: The method gets player rank and length
 	//Parameteres: Graphics
-	public int[] playerInfo(Graphics g) {
-		int[] playerInfo = new int[2];
-		playerInfo[0] = snakesCopy.get(rank).bodyParts;
-		playerInfo[1] = rank + 1;
+	public int[] playerInfo(Graphics g) {	
 		g.setColor(new Color(50, 50, 50, 128));
         g.drawRect(0, GamePanel.VIEW_HEIGHT-125, 125, 50);
         g.fillRect(0, GamePanel.VIEW_HEIGHT-125, 125, 50);
@@ -71,21 +75,15 @@ public class Leaderboard{
 	//Description: This is a comparator class to compare snake body lengths 
 	private class leaderComparator implements Comparator<Snake> {
 		public int compare(Snake s1, Snake s2) {
-			if(s1.bodyParts == s2.bodyParts)
+			if(s1.length == s2.length)
 		        return 0;
-		    else if(s1.bodyParts > s2.bodyParts)
+		    else if(s1.length > s2.length)
 		        return -1;
 		    else
 		    	return 1;
 		}
 	}
-	
-	//Description: This is a comparator class to compare whether snake is a player
-	private class playerComparator implements Comparator<Snake> {
-		public int compare(Snake s1, Snake s2) {
-			return (-1 * Boolean.compare(s1.isPlayer, s2.isPlayer));
-		}
-	}
+
 
 }
 

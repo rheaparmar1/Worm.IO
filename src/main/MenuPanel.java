@@ -132,6 +132,7 @@ public class MenuPanel extends JPanel implements ActionListener, KeyListener, Fo
 		return isValid;
 	}
 
+
 	public void keyPressed(KeyEvent e) {
 		int key = e.getKeyCode();
 		String name = e.getComponent().getName();
@@ -151,7 +152,9 @@ public class MenuPanel extends JPanel implements ActionListener, KeyListener, Fo
 		else if(event.equals("rules")) {
 			JOptionPane.showMessageDialog(null, "Use your mousepad/mouse to pilot your worm around the map to eat food and grow. \n"
 					+ "Kill other worms by making their head collide into worm body/game borders. \n"
-					+ "The objective is to be the largest worm in length. ", "How To Play", JOptionPane.QUESTION_MESSAGE);
+					+ "The objective is to be the largest worm in length. "
+					+ "\n\nTurn hacks on/off by pressing the space bar."
+					+ "\nSpeed boost by pressing mouse.", "How To Play", JOptionPane.QUESTION_MESSAGE);
 		}
 		else if(event.equals("about")) {
 			JOptionPane.showMessageDialog(null, "Creators: Karen & Rhea \nIdea from: Slither.io\n\n Have fun!", "About Worm.io", JOptionPane.QUESTION_MESSAGE);
@@ -183,4 +186,6 @@ public class MenuPanel extends JPanel implements ActionListener, KeyListener, Fo
 		// TODO Auto-generated method stub
 		
 	}
+
+
 }

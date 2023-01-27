@@ -37,7 +37,7 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener, 
 	public static Map<Integer, Snake> snakes = new HashMap<Integer, Snake>();
 	public static HashSet<Food> foods = new HashSet<Food>();
 	
-	private MainFrame mainFrame;
+	private static MainFrame mainFrame;
 	public static final Camera cam = new Camera(0, 0);
 	private Thread gameThread;
     private Leaderboard lb = new Leaderboard(this);
@@ -48,10 +48,11 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener, 
 	private int[] playerInfo = new int[2];
 	private boolean runGame = false;
 	private boolean lose = false;
+	private boolean hacksOn = false;
 
 	//Constructor
-	public GamePanel(MainFrame mainFrame) {
-		this.mainFrame = mainFrame;
+	public GamePanel(MainFrame mF) {
+		mainFrame = mF;
 		this.backBuffer = new BufferedImage(VIEW_WIDTH, VIEW_HEIGHT, BufferedImage.TYPE_INT_RGB); //gameboard
 		
 		try { //load game over image
@@ -66,7 +67,7 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener, 
 		setBackground(Color.BLACK);
 		addMouseMotionListener(this);
 		addMouseListener(this);
-		bindEscKey();
+		bindKeys();
 	}
 	
 	//Description: The method starts game thread
@@ -111,7 +112,7 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener, 
 	@Override
 	public void mouseMoved(MouseEvent e) {
 		if(!lose)
-			player.setTarget((int) (e.getX() + cam.x), (int) (e.getY() + cam.y));
+			player.setTarget((int) (e.getX() + cam.x), (int) (e.getY() + cam.y)); //move player to mouse
 	}
 
 	@Override
@@ -132,12 +133,13 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener, 
 		player.move(); 
 		cam.focus(player); //move view screen to centre on player
 		
-	
-		if(snakes.size() < SNAKE_COUNT) {//3 for now
+		//generate snake bots
+		if(snakes.size() < SNAKE_COUNT) {
 			snakes.put(botCounter, new SnakeBot(randomPoint(), botCounter));
 			botCounter++;
 		}
 	
+		//set food target for every bot
 		for(Entry<Integer, Snake> entry: snakes.entrySet()) {
 			if(entry.getKey() != 0) {
 				SnakeBot sB = (SnakeBot) entry.getValue();
@@ -145,17 +147,26 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener, 
 				sB.setTarget(tP.x, tP.y);
 				sB.move();
 			}
-			
-
 		}
 		
+		//generate food
 		if (foods.size() < FOOD_COUNT) {
 			Food newFood = new Food(randomPoint());
 			while (!foods.add(newFood))
 				;
 		}
 		lb.update();
-
+	}
+	
+	
+	//Description: The method calculate new position of mouse (when mouse is stationary and snake has achieved target)
+	//Parameters: n/a
+	//Return: new target point
+	public static Point getMousePoint() {
+		Point p = MouseInfo.getPointerInfo().getLocation();
+		Point m = mainFrame.getLocation();
+		Point target = new Point((int)(p.x-m.x+cam.x), (int)(p.y-m.y+cam.y)); //adjust from window desktop coordinates to game window
+		return target;
 	}
 
 	//Description: The method draws game components
@@ -164,7 +175,7 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener, 
 		Graphics g = this.getGraphics(); //panel graphics
 		Graphics2D gB = (Graphics2D) backBuffer.getGraphics(); //gameboard graphics
 		Graphics2D gV = (Graphics2D) backBuffer.getGraphics(); //view screen graphics
-	
+
 		gB.setColor(Color.BLACK);
 		gB.fillRect(0, 0, VIEW_WIDTH, VIEW_HEIGHT);	
 		
@@ -173,7 +184,8 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener, 
 		for(Entry<Integer, Snake> entry: snakes.entrySet()) {
 			Snake s = entry.getValue();
 			s.draw(gB);
-
+			if(hacksOn)
+				s.drawHacks(gB);
 		}
 		Iterator<Food> it = foods.iterator();
 		while (it.hasNext()) {
@@ -182,7 +194,7 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener, 
 		}
 		cam.turnOff(gB);
 
-		if(lose) 
+		if(lose) //if player dies
 			drawLoseScreen(gV);
 		else {
 			miniMap.drawMiniMap(gV);
@@ -191,7 +203,6 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener, 
 		}
 
 		g.drawImage(backBuffer, 0, 0, this);
-		
 	}
 
 	//Description: The method initialise game variables
@@ -204,18 +215,7 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener, 
 		    it.next();
 		    it.remove();
 		}
-		foods.removeAll(foods);
-//		for (int x = 0;x < 10; x++) {
-//            for (int y = 0; y < 10;y++) {
-//                if (x == 5 && y == 5)
-//                    player = new Player(new Point(350+x*700, 210+y*420), mainFrame.getPlayerName()); //create player
-//                else {
-//                    snakes.put(botCounter, new SnakeBot(new Point(350+x*700, 210+y*420), botCounter));
-//                    botCounter++;
-//                }
-//            }
-//		}
-		
+		foods.removeAll(foods);		
 		player = new Player(new Point(randomPoint()), mainFrame.getPlayerName()); //create player
 		snakes.put(0, player); //player always at map index 0
 		cam.focus(player);
@@ -236,14 +236,15 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener, 
 			while (it.hasNext()) {
 				Food f = it.next();
 				if (f.checkFoodCollide(h)) {
-					player.Grew();
+					player.grow();
 					Point newPoint = randomPoint();
 					f.x = newPoint.x;
 					f.y = newPoint.y;
 				}
 			}
 		}
-
+		
+		//check if bot collides with food
 		for(Entry<Integer, Snake> entry: snakes.entrySet()) {
 			if(entry.getKey() != 0) {
 				SnakeBot sB = (SnakeBot) entry.getValue();
@@ -252,7 +253,7 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener, 
 				while (it.hasNext()) {
 					Food f = it.next();
 					if (f.checkFoodCollide(botH)) {
-						sB.Grew();
+						sB.grow();
 						Point newPoint = randomPoint();
 						f.x = newPoint.x;
 						f.y = newPoint.y;
@@ -261,8 +262,7 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener, 
 			}
 		}
 		
-		//body collision
-
+		//collision to snake body
 		Iterator<Entry<Integer, Snake>> it = snakes.entrySet().iterator();
 		while (it.hasNext()) {
 			Map.Entry<Integer, Snake> pair = it.next();
@@ -274,9 +274,8 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener, 
 		    		lose = true;
 		    		stopGame();
 		    	}
-		    	else {
+		    	else
 		    	 	it.remove();
-		    	}
 			}
 		}	
 		
@@ -303,13 +302,16 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener, 
 		g.drawImage(loseScreen, VIEW_WIDTH/3, VIEW_HEIGHT/4, null);
 		g.setFont(new Font("Helvetica", Font.PLAIN, 24));
 		g.drawString("Your length was " + playerInfo[0], VIEW_WIDTH/3+130, VIEW_HEIGHT/4+165);
-		g.drawString("Your rank was " + playerInfo[1], VIEW_WIDTH/3+150, VIEW_HEIGHT/4+200);
-
-	    
+		g.drawString("Your rank was " + playerInfo[1], VIEW_WIDTH/3+150, VIEW_HEIGHT/4+200); 
 	}
-	private void bindEscKey() {
+	
+	//Description: The method binds escape key to panel
+	//Parameters: n/a
+	//Return: n/a
+	private void bindKeys() {
         InputMap inputMap = this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
         inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "escapeAction");
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0), "spaceAction");
         Action escapeAction = new AbstractAction() {
 			private static final long serialVersionUID = 1L; //suppress a serializable warning
 
@@ -323,10 +325,21 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener, 
             	mainFrame.gameOff();
         	}
         };
-        ActionMap actionMap = this.getActionMap();
-        actionMap.put("escapeAction", escapeAction);
-	}
+        Action spaceAction = new AbstractAction() {
+			private static final long serialVersionUID = 1L; //suppress a serializable warning
 
+			public void actionPerformed(ActionEvent e) {
+            	if(hacksOn)
+            		hacksOn = false;
+            	else
+            		hacksOn = true;
+        	}
+        };
+        ActionMap actionMap = this.getActionMap();
+        actionMap.put("escapeAction", escapeAction); //bind escape key
+        actionMap.put("spaceAction", spaceAction); //bind space key
+	}
+	
 	@Override
 	public void mouseClicked(MouseEvent e) {
 		// TODO Auto-generated method stub
@@ -335,14 +348,14 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener, 
 
 	@Override
 	public void mousePressed(MouseEvent e) {
-		System.out.print("drag");
+		//System.out.print("drag");
 		player.speed=20;
 		//player.boost.
 	}
 
 	@Override
 	public void mouseReleased(MouseEvent e) {
-		System.out.print("release");
+		//System.out.print("release");
 		player.speed=10;		
 	}
 

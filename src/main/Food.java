@@ -21,7 +21,7 @@ public class Food extends Point {
 
 
 	public void draw(Graphics g) {
-		g.setColor(Color.red);
+		g.setColor(new Color(204,4,4));
 		g.fillOval(x, y, size, size);
 	}
 

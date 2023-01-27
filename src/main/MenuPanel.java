@@ -102,7 +102,7 @@ public class MenuPanel extends JPanel implements ActionListener, KeyListener, Fo
 		
 		if (pb>currentPB) { //add new pb 
 			try {
-				PrintWriter outFile = new PrintWriter(new FileWriter("pb.txt", true));
+				PrintWriter outFile = new PrintWriter(new FileWriter("pb.txt"));
 				outFile.println(pb);
 				outFile.close();
 				pbLabel.setText("Your personal best is " + pb + "!");

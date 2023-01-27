@@ -19,7 +19,7 @@ public class MiniMap extends BackgroundTiles{
 	}
 	
 	//Description: The method draws mini map onto view screen directly
-	//Parameteres: Graphics2D
+	//Parameters: Graphics2D
 	public void drawMiniMap(Graphics2D g) {
 		BufferedImage original = new BufferedImage(GamePanel.MAP_WIDTH, GamePanel.MAP_HEIGHT, BufferedImage.TYPE_INT_RGB); //full gameboard image
 		Graphics graphics = original.getGraphics();

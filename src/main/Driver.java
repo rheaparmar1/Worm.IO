@@ -1,9 +1,11 @@
 package main;
+
 import javax.swing.JFrame;
 //Karen
 public class Driver {
-	static int width = 1400;
-	static int height = 700;
+	private static int width = 1400;
+	private static int height = 700;
+	
 	
 	public static void main(String[] args) {
 		JFrame frame = new MainFrame();

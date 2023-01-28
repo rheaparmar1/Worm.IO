@@ -1,5 +1,8 @@
 package main;
 import java.awt.CardLayout;
+import java.awt.Color;
+import java.util.Random;
+
 import javax.swing.*;
 
 public class MainFrame extends JFrame{

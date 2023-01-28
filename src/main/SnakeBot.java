@@ -23,19 +23,38 @@ public class SnakeBot extends Snake{
 	public TargetPoint findNearestFood(HashSet<Food> foods) {
 		TargetPoint smallestTP = new TargetPoint();
 		TargetPoint currentTP = new TargetPoint();
+		boolean smoothFound = false;
 
-		//find the smallest distance to food and its coordinate
 		Iterator<Food> it = foods.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			Food f = it.next();
-			currentTP.distance = (int) Math.sqrt((f.x-headX)*(f.x-headX)+(f.y-headY)*(f.y-headY));
-			if(currentTP.distance < smallestTP.distance) {
+			currentTP.distance = (int) Math.sqrt((f.x - headX) * (f.x - headX) + (f.y - headY) * (f.y - headY));
+			boolean smooth = isSmoothTurn(f);
+			if (smooth && currentTP.distance < smallestTP.distance) {
 				smallestTP.distance = currentTP.distance;
 				smallestTP.x = f.x;
 				smallestTP.y = f.y;
-			}	
-		}		
+				smoothFound = true;
+			}
+
+		}
+
+		if (!smoothFound) {
+			it = foods.iterator();
+			while (it.hasNext()) {
+				Food f = it.next();
+				currentTP.distance = (int) Math.sqrt((f.x - headX) * (f.x - headX) + (f.y - headY) * (f.y - headY));
+				if (currentTP.distance < smallestTP.distance) {
+					smallestTP.distance = currentTP.distance;
+					smallestTP.x = f.x;
+					smallestTP.y = f.y;
+					smoothFound = true;
+				}
+
+			}
+		}
+
 		return smallestTP;
-		
+
 	}
 }

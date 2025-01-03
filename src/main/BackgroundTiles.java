@@ -8,14 +8,14 @@ import javax.imageio.ImageIO;
 
 public class BackgroundTiles {
 	
-	//Static Variable
+	//STATIC VARIABLES
 	static final int TILE_SIZE = 50;
 		
-	//Instance Variables
+	//INSTANCE VARIABLES
 	private GamePanel gp;
 	private BufferedImage[] tile;
 	
-	//Constructor
+	//CONSTRUCTOR
 	public BackgroundTiles(GamePanel gp) {
 		this.gp = gp;
 		tile = new BufferedImage[2];

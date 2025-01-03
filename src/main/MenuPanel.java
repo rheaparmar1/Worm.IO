@@ -8,7 +8,7 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 
 public class MenuPanel extends JPanel implements ActionListener, KeyListener, FocusListener {
-	// Variables
+	// INSTANCE VARIABLES
 	private MainFrame frame;
 	private CardLayout cardLayout;
 
@@ -23,11 +23,10 @@ public class MenuPanel extends JPanel implements ActionListener, KeyListener, Fo
 	private static int height = 700;
 	private static BufferedImage mainMenu;
 
-	// Constructor
+	//CONSTRUCTOR
 	public MenuPanel(MainFrame frame) {
 		this.frame = frame;
 		cardLayout = new CardLayout();
-
 		setPreferredSize(new Dimension(width, height));
 		setLayout(null);
 
@@ -38,7 +37,10 @@ public class MenuPanel extends JPanel implements ActionListener, KeyListener, Fo
 		}
 
 		pb = updatePB(pb);
-		pbLabel = new JLabel("Your personal best is " + pb + "!");
+		if (pb==0)
+			pbLabel = new JLabel("     No personal best!");
+		else
+			pbLabel = new JLabel("Your personal best is " + pb + "!");
 		pbLabel.setBounds((width - 250) / 2, 270, 300, 80);
 		pbLabel.setFont(new Font("Helvetica", Font.BOLD, 22));
 		pbLabel.setForeground(Color.white);
@@ -50,6 +52,7 @@ public class MenuPanel extends JPanel implements ActionListener, KeyListener, Fo
 		nameTextArea.addFocusListener(this);
 		nameTextArea.addKeyListener(this);
 
+		//set up buttons
 		playButton = new JButton(play);
 		playButton.setBounds((width - 200) / 2, 410, 200, 60);
 		playButton.setActionCommand("play");
@@ -72,11 +75,6 @@ public class MenuPanel extends JPanel implements ActionListener, KeyListener, Fo
 		add(aboutButton);
 	}
 
-	// Get player name
-	public String getPlayerName() {
-		return nameTextArea.getText();
-	}
-
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		g.drawImage(mainMenu, 0, 0, null);
@@ -84,7 +82,7 @@ public class MenuPanel extends JPanel implements ActionListener, KeyListener, Fo
 	}
 
 	// Description: The method gets greatest personal best from text file
-	// Parameteres: int new personal best
+	// Parameters: int new personal best
 	// Return: int of highest pb
 	public int updatePB(int pb) {
 		BufferedReader inFile;
@@ -104,7 +102,7 @@ public class MenuPanel extends JPanel implements ActionListener, KeyListener, Fo
 				PrintWriter outFile = new PrintWriter(new FileWriter("pb.txt"));
 				outFile.println(pb);
 				outFile.close();
-				pbLabel.setText("Your personal best is " + pb + "!");
+					pbLabel.setText("Your personal best is " + pb + "!");
 				return pb;
 			} catch (IOException e) {
 				System.out.println("File error");
@@ -115,7 +113,7 @@ public class MenuPanel extends JPanel implements ActionListener, KeyListener, Fo
 	}
 
 	// Description: The method checks if user entry name is valid
-	// Parameteres: n/a
+	// Parameters: n/a
 	// Return: boolean isValidEntry
 	private boolean checkName() {
 		boolean isValid = false;
@@ -131,16 +129,6 @@ public class MenuPanel extends JPanel implements ActionListener, KeyListener, Fo
 		return isValid;
 	}
 
-	public void keyPressed(KeyEvent e) {
-		int key = e.getKeyCode();
-		String name = e.getComponent().getName();
-		if (key == KeyEvent.VK_ENTER && name.equals("name")) {
-			if (checkName())
-				frame.gameOn();
-
-		}
-	}
-
 	public void actionPerformed(ActionEvent e) {
 		String event = e.getActionCommand();
 		if (event.equals("play")) {
@@ -151,14 +139,21 @@ public class MenuPanel extends JPanel implements ActionListener, KeyListener, Fo
 					"Use your mousepad/mouse to pilot your worm around the map to eat food and grow. \n"
 							+ "Kill other worms by making their head collide into worm body/game borders. \n"
 							+ "The objective is to be the largest worm in length. "
-							+ "\n\nTurn hacks on/off by pressing the space bar." + "\nSpeed boost by pressing mouse.",
-					"How To Play", JOptionPane.QUESTION_MESSAGE);
+							+ "\n\n\t- Turn hacks on/off by pressing the space bar." + "\n\t- Speed boost (with min length 8) by holding down mouse."+ "\n\t- Hit esc key to return to main menu.",
+							"How To Play", JOptionPane.QUESTION_MESSAGE);
 		} else if (event.equals("about")) {
 			JOptionPane.showMessageDialog(null, "Creators: Karen & Rhea \nIdea from: Slither.io\n\n Have fun!",
 					"About Worm.io", JOptionPane.QUESTION_MESSAGE);
 		}
 	}
 
+	// GETTERS + SETTERS
+	public String getPlayerName() {
+		return nameTextArea.getText();
+	}
+
+	//ABSTRACT METHODS
+	@Override
 	public void focusGained(FocusEvent e) {
 		nameTextArea.setText("");
 	}
@@ -168,7 +163,6 @@ public class MenuPanel extends JPanel implements ActionListener, KeyListener, Fo
 		if (nameTextArea.getText().equals("")) {
 			nameTextArea.setText("enter name...");
 		}
-
 	}
 
 	@Override
@@ -181,6 +175,16 @@ public class MenuPanel extends JPanel implements ActionListener, KeyListener, Fo
 	public void keyReleased(KeyEvent e) {
 		// TODO Auto-generated method stub
 
+	}
+	@Override
+	public void keyPressed(KeyEvent e) {
+		int key = e.getKeyCode();
+		String name = e.getComponent().getName();
+		if (key == KeyEvent.VK_ENTER && name.equals("name")) {
+			if (checkName())
+				frame.gameOn();
+
+		}
 	}
 
 }

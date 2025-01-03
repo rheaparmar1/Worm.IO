@@ -11,7 +11,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 public class Leaderboard{
-	//Instance variables
+	//INSTANCE VARIABLES
 	private GamePanel gp;
 	private int x;
   	private int y;
@@ -20,7 +20,8 @@ public class Leaderboard{
 	private List<Snake> snakesCopy;
 	private int rank;
 	private int[] playerInfo = new int[2];
-	//Constructor
+	
+	//CONSTRUCTOR
 	public Leaderboard(GamePanel gp) {
 		this.gp = gp;
 		for(int i = 0; i < 10; i++) {
@@ -30,7 +31,7 @@ public class Leaderboard{
 	}
 	
 	//Description: The method orders snakes from largest to smallest
-	//Parameteres: n/a
+	//Parameters: n/a
 	public void update(){
 		snakesCopy = new ArrayList<Snake>(GamePanel.snakes.values());
 		if(snakesCopy.size()>1)
@@ -46,7 +47,7 @@ public class Leaderboard{
 	}
 	
 	//Description: The method draws leaderboard onto view screen directly
-	//Parameteres: Graphics
+	//Parameters: Graphics
 	public void draw(Graphics g) {
 		for (int i = 0; i < 10; i++) {
 	        g.setColor(new Color(50, 50, 50, 128));
@@ -59,7 +60,7 @@ public class Leaderboard{
 	}
 	
 	//Description: The method gets player rank and length
-	//Parameteres: Graphics
+	//Parameters: Graphics
 	public int[] playerInfo(Graphics g) {	
 		g.setColor(new Color(50, 50, 50, 128));
         g.drawRect(0, GamePanel.VIEW_HEIGHT-125, 125, 50);
@@ -83,7 +84,4 @@ public class Leaderboard{
 		    	return 1;
 		}
 	}
-
-
 }
-

@@ -5,21 +5,21 @@ import java.awt.image.*;
 import java.util.Map.Entry;
 
 public class MiniMap extends BackgroundTiles{
-	//Instance variables
+	//INSTANCE VARIABLES
 	private GamePanel gp;
 	private int width = (int) Math.ceil(GamePanel.BOARD_WIDTH/50.0);
 	private int height = (int)Math.ceil(GamePanel.BOARD_HEIGHT/50.0);
 	private int x = GamePanel.VIEW_WIDTH-width - 30;
 	private int y = 10;
 	
-	//Constructor
+	//CONSTRUCTOR
 	public MiniMap(GamePanel gp) {
 		super(gp);
 		this.gp = gp;
 	}
 	
 	//Description: The method draws mini map onto view screen directly
-	//Parameteres: Graphics2D
+	//Parameters: Graphics2D
 	public void drawMiniMap(Graphics2D g) {
 		BufferedImage original = new BufferedImage(GamePanel.MAP_WIDTH, GamePanel.MAP_HEIGHT, BufferedImage.TYPE_INT_RGB); //full gameboard image
 		Graphics graphics = original.getGraphics();

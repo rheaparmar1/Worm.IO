@@ -11,6 +11,7 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 
 public class GamePanel extends JPanel implements Runnable, MouseMotionListener, MouseListener {
+	//INSTANCE VARIABLES
 	static final int VIEW_WIDTH = 1400;
 	static final int VIEW_HEIGHT = 700;
 	static final int MAP_WIDTH = 7000;
@@ -22,11 +23,12 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener, 
 	static final Point topLeft = new Point((int) VIEW_WIDTH / 2, (int) VIEW_HEIGHT / 2);
 	static final Point bottomRight = new Point(BOARD_WIDTH + (int) VIEW_WIDTH / 2, BOARD_HEIGHT + (int) VIEW_HEIGHT / 2);
 	static final Point mapBottomRight = new Point(BOARD_WIDTH + VIEW_WIDTH, BOARD_HEIGHT + VIEW_HEIGHT);
+	
 	static final int UNIT_SIZE = 10;
-	static final int SNAKE_COUNT = 60;
-	static final int FOOD_COUNT = 700;
-
-	static final int FPS = 60;
+	static final int SNAKE_COUNT = 80;
+	static final int FOOD_COUNT = 3000;
+	static final int FPS = 100;
+	
 	public int pB;
 	public int botCounter = 1;
 
@@ -48,7 +50,8 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener, 
 	private boolean runGame = false;
 	private boolean lose = false;
 	private boolean hacksOn = false;
-	//Constructor
+
+	//CONSTRUCTOR
 	public GamePanel(MainFrame mF) {
 		mainFrame = mF;
 		this.backBuffer = new BufferedImage(VIEW_WIDTH, VIEW_HEIGHT, BufferedImage.TYPE_INT_RGB); //gameboard
@@ -58,7 +61,8 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener, 
 		} catch (IOException e) {
 			System.out.println("File cannot be found"); 
 		}
-
+		
+		//Set up
 		setPreferredSize(new Dimension(VIEW_WIDTH, VIEW_HEIGHT));
 		this.setBackground(Color.black);
 		this.setFocusable(true);
@@ -77,7 +81,7 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener, 
 		runGame = true;
 	}
 
-	//Description: The method contains gamethread
+	//Description: The method contains game thread
 	//Parameters: n/a
 	@Override
 	public void run() {
@@ -104,16 +108,6 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener, 
 		}
 	}
 
-	@Override
-	public void mouseMoved(MouseEvent e) {
-		if(!lose)
-			player.setTarget((int) (e.getX() + cam.x), (int) (e.getY() + cam.y)); //move player to mouse
-	}
-
-	@Override
-	public void mouseDragged(MouseEvent e) {
-	}
-
 	//Description: The method stops game thread
 	//Parameters:
 	private void stopGame() {
@@ -125,7 +119,6 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener, 
 	//Description: The method updates game status (player location, focus camera on player, generate food, leaderboard)
 	//Parameters: n/a
 	private void update() {
-		System.out.println(foods.size());
 		player.move(); 
 		cam.focus(player); //move view screen to centre on player
 	
@@ -159,8 +152,8 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener, 
 			Food r = it.next();
 			long time = r.timestamp;
 			long diff = System.currentTimeMillis() - time;
-			//if food is not in view of player and older than 10 seconds, remove
-			if(!player.inView(r) && diff >= 10000) { 
+			//if food is not in view of player and older than 20 seconds, remove
+			if(!player.inView(r) && diff >= 20000) { 
 				it.remove();
 				count--;
 			}
@@ -168,6 +161,7 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener, 
 		lb.update();
 
 	}
+	
 	//Description: The method calculate new position of mouse (when mouse is stationary and snake has achieved target)
 	//Parameters: n/a
 	//Return: new target point
@@ -190,16 +184,17 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener, 
 
 		cam.turnOn(gB);
 		tiles.draw(gB);
+		
+		Iterator<Food> it = foods.iterator();
+		while (it.hasNext()) {
+			Food f = it.next();
+			f.draw(gB);
+		}
 		for(Entry<Integer, Snake> entry: snakes.entrySet()) {
 			Snake s = entry.getValue();
 			s.draw(gB);
 			if(hacksOn)
 				s.drawHacks(gB);
-		}
-		Iterator<Food> it = foods.iterator();
-		while (it.hasNext()) {
-			Food f = it.next();
-			f.draw(gB);
 		}
 		cam.turnOff(gB);
 
@@ -212,12 +207,11 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener, 
 			lb.draw(gV);
 			playerInfo = lb.playerInfo(gV);
 		}
-
 		g.drawImage(backBuffer, 0, 0, this);
 
 	}
 
-	//Description: The method initialise game variables
+	//Description: The method initialize game variables
 	//Parameters: n/a
 	private void init() {
 		lose = false;
@@ -228,8 +222,6 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener, 
 			it.remove();
 		}
 		foods.removeAll(foods);
-
-
 		player = new Player(new Point(randomPoint()), mainFrame.getPlayerName()); //create player
 		snakes.put(0, player); //player always at map index 0
 		cam.focus(player);
@@ -242,7 +234,6 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener, 
 		if (h.x < topLeft.x || h.x + UNIT_SIZE > bottomRight.x || h.y < topLeft.y || h.y + UNIT_SIZE > bottomRight.y) { //snake head and border
 			lose = true;
 			stopGame();
-
 		}
 
 		if(!lose) { //snake head with food
@@ -295,19 +286,14 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener, 
 	//Description: The method generate random point on board
 	//Parameters: n/a
 	//Return: Point
-	static Point randomPoint() {
+	private static Point randomPoint() {
 		Point p = new Point(0, 0);
 		p.x = (int) (Math.random() * (MAP_WIDTH - VIEW_WIDTH - UNIT_SIZE) + BORDER_WIDTH);
 		p.y = (int) (Math.random() * (MAP_HEIGHT - VIEW_HEIGHT - UNIT_SIZE) + BORDER_HEIGHT);
 		return p;
 	}
-	//Description: The method chooses random pastel colour
-	//Parameters: n/a
-	//Return: color
-	static Color randomColour() {
-		Random random = new Random();
-		return Color.getHSBColor(random.nextFloat(), 0.6f, 1.0f);
-	}
+
+
 	//Description: The method draws random point on board
 	//Parameters: n/a
 	//Return: Point
@@ -359,6 +345,17 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener, 
         actionMap.put("spaceAction", spaceAction); //bind space key
 	}
 	
+	//ABSTRACT METHODS
+	@Override
+	public void mouseMoved(MouseEvent e) {
+		if(!lose)
+			player.setTarget((int) (e.getX() + cam.x), (int) (e.getY() + cam.y)); //move player to mouse
+	}
+
+	@Override
+	public void mouseDragged(MouseEvent e) {
+	}
+	
 	@Override
 	public void mouseClicked(MouseEvent e) {
 		// TODO Auto-generated method stub
@@ -368,14 +365,14 @@ public class GamePanel extends JPanel implements Runnable, MouseMotionListener, 
 	@Override
 	public void mousePressed(MouseEvent e) {
 		//System.out.print("drag");
-		player.speed=20;
-		//player.boost.
+		player.boost();
+	//	player.boost.start();
 	}
 
 	@Override
 	public void mouseReleased(MouseEvent e) {
-		//System.out.print("release");
-		player.speed=10;		
+		player.reduce();
+		
 	}
 
 	@Override

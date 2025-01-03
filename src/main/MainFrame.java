@@ -7,13 +7,13 @@ import javax.swing.*;
 
 public class MainFrame extends JFrame{
 	
-	//Variables
+	//INSTANCE VARIABLES
 	private static JPanel mainPanel;
 	private MenuPanel menuPanel;
 	private GamePanel gamePanel;
 	private CardLayout cardLayout;
 
-	//Constructor
+	//CONSTRUCTOR
 	public MainFrame() {
 		cardLayout = new CardLayout();
 		mainPanel = new JPanel(cardLayout);
@@ -49,6 +49,5 @@ public class MainFrame extends JFrame{
 	    cardLayout.show(mainPanel, "menu");
 
 	}
-
 
 }

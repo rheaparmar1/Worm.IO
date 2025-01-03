@@ -7,11 +7,12 @@ import java.util.*;
 
 public class SnakeBot extends Snake{
 
-	//Constructor
+	//CONSTRUCTOR
 	public SnakeBot(Point head, int num) {
 		super(head, "Worm Bot " + num, false);
 	}
 	
+	//Description: The method draws dot to represent snake
 	public void drawHead(Graphics g) { //for minimap
 		g.setColor(Color.MAGENTA);
 		g.fillOval(headX-(u*10), headY-(u*10), u*20, u*20);
@@ -19,7 +20,7 @@ public class SnakeBot extends Snake{
 	}
 	
 	//Description: The method finds the point and distance of closest food
-	//Parameteres: HashSet of all food objects (with it's coordinates)
+	//Parameters: HashSet of all food objects (with it's coordinates)
 	public TargetPoint findNearestFood(HashSet<Food> foods) {
 		TargetPoint smallestTP = new TargetPoint();
 		TargetPoint currentTP = new TargetPoint();
@@ -36,7 +37,6 @@ public class SnakeBot extends Snake{
 				smallestTP.y = f.y;
 				smoothFound = true;
 			}
-
 		}
 
 		if (!smoothFound) {
@@ -50,11 +50,21 @@ public class SnakeBot extends Snake{
 					smallestTP.y = f.y;
 					smoothFound = true;
 				}
-
 			}
 		}
 
 		return smallestTP;
+	}
+	//Description: The method finds if turn for bot would be sharp based on first and second body part
+	//Parameters: Target location
+	//Return: If turn is smooth
+	private boolean isSmoothTurn(Point target) {
+		double facingAngle = calcDegree(body.get(1), body.get(0));
+		double angleOfTarget = calcDegree(body.get(0), target);
+		double anglediff = (facingAngle - angleOfTarget + 180 + 360) % 360 - 180;
 
+		if (anglediff < 45 && anglediff > -45)
+			return true;
+		return false;
 	}
 }
